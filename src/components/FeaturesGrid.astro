@@ -1,0 +1,60 @@
+---
+interface Feature {
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+interface Props {
+  features: Feature[];
+}
+
+const { features } = Astro.props;
+---
+
+<section class="py-16 b bg-[#718bab]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-navy-800 mb-4">
+        Netdriver Framework
+      </h2>
+      <p class="text-xl text-white max-w-2xl mx-auto font-bold">
+        Netdriver is the flagship project of OpenSecFlow community.It's an free open-source NetDevOps framework based on Netmiko but with extra quality-of-life features that sets Netdriver apart.
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+      {features.map((feature) => (
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-slate-blue-200 hover:border-sky-400 transform hover:-translate-y-1 overflow-hidden">
+          {/* Gradient Header Section */}
+          <div class="relative h-20 bg-gradient-to-r from-[#44abd6] to-[#4169E1]">
+            {/* Share Icon */}
+            <div class="absolute top-4 right-4 text-white cursor-pointer hover:opacity-80 transition-opacity">
+              
+            </div>
+            
+            {/* Circular Icon Container - Overlapping */}
+            {feature.icon && (
+              <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
+                <div class="text-sky-500 text-4xl">
+                  {feature.icon}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* White Body Section */}
+          <div class="pt-12 pb-4 px-4">
+            <h3 class="text-xl font-bold text-slate-700 mb-2 text-center uppercase">
+              {feature.title}
+            </h3>
+            <p class="text-lg text-slate-blue-600 font-bold text-center">
+              {feature.description}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+

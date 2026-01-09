@@ -1,0 +1,228 @@
+---
+import { db, BlogPosts } from 'astro:db';
+import { eq } from 'astro:db';
+import MainLayout from '../../layouts/MainLayout.astro';
+import SchemaLD from '../../components/SchemaLD.astro';
+import RelatedContent from '../../components/RelatedContent.astro';
+import { marked } from 'marked';
+
+export async function getStaticPaths() {
+  const blogPosts = await db.select().from(BlogPosts);
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: typeof BlogPosts.$inferSelect;
+}
+
+const { post } = Astro.props;
+const htmlContent = marked.parse(post.body);
+
+const siteURL = Astro.site || 'https://opensecflow.com';
+const articleURL = new URL(`/blog/${post.slug}`, siteURL).toString();
+
+// Extract keywords from tags for about/mentions
+const keywords = post.tags && Array.isArray(post.tags) ? post.tags : [];
+const aboutKeywords = keywords.filter(tag => 
+  ['ssh', 'rest-api', 'network-engineering', 'automation', 'netdriver', 
+   'asyncssh', 'cli', 'rest', 'api', 'network', 'testing', 'simulation'].includes(tag.toLowerCase())
+);
+
+// TechArticle Schema
+const techArticleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: post.title,
+  description: post.description,
+  datePublished: post.pubDate.toISOString(),
+  dateModified: post.updatedDate ? post.updatedDate.toISOString() : post.pubDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: 'OpenSecFlow',
+    url: siteURL,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'OpenSecFlow',
+    url: siteURL,
+  },
+  url: articleURL,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': articleURL,
+  },
+  about: aboutKeywords.map(keyword => ({
+    '@type': 'Thing',
+    name: keyword,
+  })),
+  mentions: aboutKeywords.map(keyword => ({
+    '@type': 'Thing',
+    name: keyword,
+  })),
+  ...(post.heroImage && {
+    image: new URL(post.heroImage, siteURL).toString(),
+  }),
+};
+---
+
+<MainLayout
+  title={`${post.title} - OpenSecFlow Blog`}
+  description={post.description}
+  canonicalURL={Astro.url}
+  ogType="article"
+  ogImage={post.heroImage || undefined}
+>
+  <SchemaLD schema={techArticleSchema} />
+  
+  <!-- Animated Background -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-gradient-to-br from-white via-slate-blue-50/30 to-sky-50/50"></div>
+    <!-- Animated SVG shapes -->
+    <svg class="absolute inset-0 w-full h-full opacity-25" viewBox="0 0 1440 1200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="postGrad1" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0.15"/>
+        </linearGradient>
+        <linearGradient id="postGrad2" gradientUnits="userSpaceOnUse" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgb(18,57,104)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="rgb(65,97,133)" stop-opacity="0.1"/>
+        </linearGradient>
+        <linearGradient id="postGrad3" gradientUnits="userSpaceOnUse" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="rgb(72,104,141)" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="rgb(90,171,206)" stop-opacity="0.08"/>
+        </linearGradient>
+        <radialGradient id="postGrad4" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- Floating shapes -->
+      <path class="post-shape-1" d="M 0 300 Q 400 250 800 300 T 1600 300 L 1600 0 L 0 0 Z" fill="url(#postGrad1)"/>
+      <path class="post-shape-2" d="M 0 900 Q 500 850 1000 900 T 2000 900 L 2000 1200 L 0 1200 Z" fill="url(#postGrad2)"/>
+      <circle class="post-shape-3" cx="1100" cy="400" r="180" fill="url(#postGrad3)"/>
+      <circle class="post-shape-4" cx="300" cy="800" r="200" fill="url(#postGrad4)"/>
+      <ellipse class="post-shape-5" cx="700" cy="200" rx="150" ry="100" fill="url(#postGrad2)"/>
+      <path class="post-shape-6" d="M 1200 0 Q 1300 80 1400 0 L 1400 150 Q 1300 70 1200 150 Z" fill="url(#postGrad1)"/>
+    </svg>
+    <!-- Additional gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-blue-50/30"></div>
+  </div>
+
+  <article class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold text-navy-800 mb-4">
+        {post.title}
+      </h1>
+      <p class="text-xl text-slate-blue-600 mb-6">
+        {post.description}
+      </p>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-slate-blue-500">
+        <time datetime={post.pubDate.toISOString()}>
+          Published: {post.pubDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        {post.updatedDate && (
+          <time datetime={post.updatedDate.toISOString()}>
+            Updated: {post.updatedDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        )}
+        {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span class="px-2 py-1 bg-sky-100 text-sky-700 rounded text-xs font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </header>
+
+    {post.heroImage && (
+      <div class="mb-8 rounded-xl overflow-hidden border-2 border-slate-blue-200">
+        <img
+          src={post.heroImage}
+          alt={post.title}
+          class="w-full h-auto"
+          loading="lazy"
+          width="800"
+          height="450"
+        />
+      </div>
+    )}
+
+    <div class="prose prose-lg prose-navy max-w-none" set:html={htmlContent} />
+    
+    <RelatedContent 
+      currentSlug={post.slug}
+      currentTags={post.tags && Array.isArray(post.tags) ? post.tags : []}
+    />
+  </article>
+</MainLayout>
+
+<style>
+  @keyframes postFloat1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-25px) translateX(15px); }
+  }
+  
+  @keyframes postFloat2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(18px) translateX(-12px); }
+  }
+  
+  @keyframes postFloat3 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-20px) scale(1.08); }
+  }
+  
+  @keyframes postFloat4 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(12px) scale(0.92); }
+  }
+  
+  @keyframes postFloat5 {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50% { transform: translateX(25px) rotate(4deg); }
+  }
+  
+  @keyframes postFloat6 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(-3deg); }
+  }
+
+  .post-shape-1 {
+    animation: postFloat1 22s ease-in-out infinite;
+  }
+  
+  .post-shape-2 {
+    animation: postFloat2 28s ease-in-out infinite;
+  }
+  
+  .post-shape-3 {
+    animation: postFloat3 19s ease-in-out infinite;
+  }
+  
+  .post-shape-4 {
+    animation: postFloat4 24s ease-in-out infinite;
+  }
+  
+  .post-shape-5 {
+    animation: postFloat5 16s ease-in-out infinite;
+  }
+  
+  .post-shape-6 {
+    animation: postFloat6 21s ease-in-out infinite;
+  }
+</style>

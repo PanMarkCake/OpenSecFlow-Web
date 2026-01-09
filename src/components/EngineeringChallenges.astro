@@ -1,0 +1,171 @@
+---
+interface Challenge {
+  problem: string;
+  solution: string;
+  solutionDetails: string;
+}
+
+const challenges: Challenge[] = [
+  {
+    problem: 'Scripting SSH is fragile/slow',
+    solution: 'Persistent Session Management',
+    solutionDetails: 'NetDriver maintains open SSH connections across multiple command executions, eliminating connection overhead and enabling low-latency command execution.',
+  },
+  {
+    problem: 'Config collisions',
+    solution: 'Intelligent Command Queuing',
+    solutionDetails: 'NetDriver\'s intelligent queuing system prevents configuration collisions by serializing operations and detecting potential conflicts before execution.',
+  },
+  {
+    problem: 'Legacy Gear in Web Apps',
+    solution: 'HTTP RESTful Wrapper',
+    solutionDetails: 'NetDriver provides an HTTP RESTful wrapper that transforms legacy CLI interfaces into modern REST APIs, enabling seamless integration with web applications.',
+  },
+  {
+    problem: 'Slow updates at scale',
+    solution: 'AsyncSSH Core',
+    solutionDetails: 'Built on AsyncSSH, NetDriver enables concurrent operations across hundreds of devices simultaneously, dramatically improving automation throughput.',
+  },
+];
+---
+
+<section class="py-16 bg-gradient-to-b from-white to-slate-blue-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-navy-800 mb-4">
+        Engineering Challenges Solved
+      </h2>
+      <p class="text-xl text-slate-blue-600 max-w-3xl mx-auto">
+        NetDriver addresses the core challenges that we faced when automating infrastructure at scale.Challenges that you won't have to face by using NetDriver you don't have to.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      {challenges.map((challenge, index) => (
+        <article
+          class="bg-white rounded-xl shadow-lg border-2 border-slate-blue-200 overflow-hidden hover:shadow-xl transition-all duration-300"
+          x-data={`{ open: ${index === 0 ? 'true' : 'false'} }`}
+        >
+          <button
+            class="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-slate-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
+            x-on:click="open = !open"
+            aria-expanded="false"
+            aria-controls={`challenge-${index}`}
+          >
+            <div class="flex-1">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                  {index + 1}
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                      Problem
+                    </span>
+                    <h3 class="text-lg font-semibold text-navy-800">
+                      {challenge.problem}
+                    </h3>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                      Solution
+                    </span>
+                    <p class="text-lg font-semibold text-sky-600">
+                      {challenge.solution}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <svg
+              class="flex-shrink-0 w-6 h-6 text-slate-blue-500 transition-transform duration-200"
+              x-bind:class="{ 'rotate-180': open }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          <div
+            id={`challenge-${index}`}
+            class="px-6 pb-5 pl-20"
+            x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2"
+          >
+            <p class="text-slate-blue-700 leading-relaxed">
+              {challenge.solutionDetails}
+            </p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  // Alpine.js is not included, so we'll use vanilla JavaScript for accordion functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const accordionButtons = document.querySelectorAll('[aria-controls^="challenge-"]');
+    
+    accordionButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const targetId = button.getAttribute('aria-controls');
+        const target = document.getElementById(targetId);
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+        
+        // Close all other accordions
+        accordionButtons.forEach((otherButton) => {
+          if (otherButton !== button) {
+            const otherTargetId = otherButton.getAttribute('aria-controls');
+            const otherTarget = document.getElementById(otherTargetId);
+            if (otherTarget) {
+              otherTarget.style.display = 'none';
+              otherButton.setAttribute('aria-expanded', 'false');
+              const svg = otherButton.querySelector('svg');
+              if (svg) svg.style.transform = 'rotate(0deg)';
+            }
+          }
+        });
+        
+        // Toggle current accordion
+        if (target) {
+          if (isExpanded) {
+            target.style.display = 'none';
+            button.setAttribute('aria-expanded', 'false');
+            const svg = button.querySelector('svg');
+            if (svg) svg.style.transform = 'rotate(0deg)';
+          } else {
+            target.style.display = 'block';
+            button.setAttribute('aria-expanded', 'true');
+            const svg = button.querySelector('svg');
+            if (svg) svg.style.transform = 'rotate(180deg)';
+          }
+        }
+      });
+    });
+    
+    // Initialize first accordion as open
+    const firstButton = accordionButtons[0];
+    if (firstButton) {
+      const firstTargetId = firstButton.getAttribute('aria-controls');
+      const firstTarget = document.getElementById(firstTargetId);
+      if (firstTarget) {
+        firstTarget.style.display = 'block';
+        firstButton.setAttribute('aria-expanded', 'true');
+        const svg = firstButton.querySelector('svg');
+        if (svg) svg.style.transform = 'rotate(180deg)';
+      }
+    }
+  });
+</script>

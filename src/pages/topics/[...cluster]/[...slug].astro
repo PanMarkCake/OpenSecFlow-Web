@@ -1,0 +1,289 @@
+---
+import { db, BlogPosts } from 'astro:db';
+import { eq } from 'astro:db';
+import MainLayout from '../../../layouts/MainLayout.astro';
+import SchemaLD from '../../../components/SchemaLD.astro';
+import RelatedContent from '../../../components/RelatedContent.astro';
+import { marked } from 'marked';
+
+export async function getStaticPaths() {
+  const blogPosts = await db.select().from(BlogPosts);
+  const paths = [];
+  
+  // Map of cluster tags to URL segments
+  const clusterMap: Record<string, string> = {
+    'scaling-automation': 'scaling-automation',
+    'legacy-integration': 'legacy-integration',
+    'testing-simulation': 'testing-simulation',
+  };
+  
+  for (const post of blogPosts) {
+    if (post.tags && Array.isArray(post.tags)) {
+      // Find which cluster this post belongs to
+      for (const tag of post.tags) {
+        if (clusterMap[tag]) {
+          paths.push({
+            params: { cluster: clusterMap[tag], slug: post.slug },
+            props: { post, cluster: clusterMap[tag] },
+          });
+          break; // Only add once, even if multiple cluster tags exist
+        }
+      }
+    }
+  }
+  
+  return paths;
+}
+
+interface Props {
+  post: typeof BlogPosts.$inferSelect;
+  cluster: string;
+}
+
+const { post, cluster } = Astro.props;
+const htmlContent = marked.parse(post.body);
+
+// Get cluster name for display
+const clusterNames: Record<string, string> = {
+  'scaling-automation': 'Scaling Automation',
+  'legacy-integration': 'Legacy Integration',
+  'testing-simulation': 'Testing & Simulation',
+};
+
+const clusterName = clusterNames[cluster] || cluster;
+
+const siteURL = Astro.site || 'https://opensecflow.com';
+const articleURL = new URL(`/topics/${cluster}/${post.slug}`, siteURL).toString();
+
+// Extract keywords from tags for about/mentions
+const keywords = post.tags && Array.isArray(post.tags) ? post.tags : [];
+const aboutKeywords = keywords.filter(tag => 
+  ['ssh', 'rest-api', 'network-engineering', 'automation', 'netdriver', 
+   'asyncssh', 'cli', 'rest', 'api', 'network', 'testing', 'simulation'].includes(tag.toLowerCase())
+);
+
+// TechArticle Schema
+const techArticleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: post.title,
+  description: post.description,
+  datePublished: post.pubDate.toISOString(),
+  dateModified: post.updatedDate ? post.updatedDate.toISOString() : post.pubDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: 'OpenSecFlow',
+    url: siteURL,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'OpenSecFlow',
+    url: siteURL,
+  },
+  url: articleURL,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': articleURL,
+  },
+  about: aboutKeywords.map(keyword => ({
+    '@type': 'Thing',
+    name: keyword,
+  })),
+  mentions: aboutKeywords.map(keyword => ({
+    '@type': 'Thing',
+    name: keyword,
+  })),
+  ...(post.heroImage && {
+    image: new URL(post.heroImage, siteURL).toString(),
+  }),
+};
+---
+
+<MainLayout
+  title={`${post.title} - ${clusterName} - NetDriver Topics`}
+  description={post.description}
+  canonicalURL={Astro.url}
+  ogType="article"
+  ogImage={post.heroImage || undefined}
+>
+  <SchemaLD schema={techArticleSchema} />
+  
+  <!-- Animated Background -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-gradient-to-br from-white via-sky-50/40 to-slate-blue-50/40"></div>
+    <!-- Animated SVG shapes -->
+    <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 1440 1200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="topicGrad1" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="topicGrad2" gradientUnits="userSpaceOnUse" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgb(18,57,104)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="rgb(65,97,133)" stop-opacity="0.15"/>
+        </linearGradient>
+        <linearGradient id="topicGrad3" gradientUnits="userSpaceOnUse" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="rgb(72,104,141)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="rgb(90,171,206)" stop-opacity="0.12"/>
+        </linearGradient>
+        <radialGradient id="topicGrad4" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- Floating shapes -->
+      <path class="topic-shape-1" d="M 0 250 Q 450 200 900 250 T 1800 250 L 1800 0 L 0 0 Z" fill="url(#topicGrad1)"/>
+      <path class="topic-shape-2" d="M 0 950 Q 600 900 1200 950 T 2400 950 L 2400 1200 L 0 1200 Z" fill="url(#topicGrad2)"/>
+      <circle class="topic-shape-3" cx="1000" cy="350" r="160" fill="url(#topicGrad3)"/>
+      <circle class="topic-shape-4" cx="250" cy="750" r="180" fill="url(#topicGrad4)"/>
+      <ellipse class="topic-shape-5" cx="600" cy="150" rx="120" ry="80" fill="url(#topicGrad2)"/>
+      <path class="topic-shape-6" d="M 1100 0 Q 1200 60 1300 0 L 1300 120 Q 1200 60 1100 120 Z" fill="url(#topicGrad1)"/>
+      <path class="topic-shape-7" d="M 300 1000 Q 350 1050 400 1000 L 400 1100 Q 350 1050 300 1100 Z" fill="url(#topicGrad3)"/>
+    </svg>
+    <!-- Additional gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sky-50/40"></div>
+  </div>
+
+  <article class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <header class="mb-8">
+      <nav class="mb-4 text-sm text-slate-blue-500">
+        <a href="/" class="hover:text-sky-500">Home</a>
+        <span class="mx-2">/</span>
+        <a href="/topics" class="hover:text-sky-500">Topics</a>
+        <span class="mx-2">/</span>
+        <a href={`/topics/${cluster}`} class="hover:text-sky-500">{clusterName}</a>
+        <span class="mx-2">/</span>
+        <span class="text-slate-blue-600">{post.title}</span>
+      </nav>
+      
+      <div class="mb-4">
+        <a
+          href={`/topics/${cluster}`}
+          class="inline-block px-3 py-1 bg-sky-100 text-sky-700 rounded-full text-sm font-medium hover:bg-sky-200 transition-colors"
+        >
+          {clusterName}
+        </a>
+      </div>
+      
+      <h1 class="text-4xl font-bold text-navy-800 mb-4">
+        {post.title}
+      </h1>
+      <p class="text-xl text-slate-blue-600 mb-6">
+        {post.description}
+      </p>
+      <div class="flex flex-wrap items-center gap-4 text-sm text-slate-blue-500">
+        <time datetime={post.pubDate.toISOString()}>
+          Published: {post.pubDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        {post.updatedDate && (
+          <time datetime={post.updatedDate.toISOString()}>
+            Updated: {post.updatedDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        )}
+        {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span class="px-2 py-1 bg-sky-100 text-sky-700 rounded text-xs font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </header>
+
+    {post.heroImage && (
+      <div class="mb-8 rounded-xl overflow-hidden border-2 border-slate-blue-200">
+        <img
+          src={post.heroImage}
+          alt={post.title}
+          class="w-full h-auto"
+          loading="lazy"
+          width="800"
+          height="450"
+        />
+      </div>
+    )}
+
+    <div class="prose prose-lg prose-navy max-w-none" set:html={htmlContent} />
+    
+    <RelatedContent 
+      currentSlug={post.slug}
+      currentTags={post.tags && Array.isArray(post.tags) ? post.tags : []}
+      currentCluster={cluster}
+    />
+  </article>
+</MainLayout>
+
+<style>
+  @keyframes topicFloat1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-28px) translateX(18px); }
+  }
+  
+  @keyframes topicFloat2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(20px) translateX(-14px); }
+  }
+  
+  @keyframes topicFloat3 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-22px) scale(1.1); }
+  }
+  
+  @keyframes topicFloat4 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(14px) scale(0.9); }
+  }
+  
+  @keyframes topicFloat5 {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50% { transform: translateX(28px) rotate(5deg); }
+  }
+  
+  @keyframes topicFloat6 {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-18px) rotate(-4deg); }
+  }
+  
+  @keyframes topicFloat7 {
+    0%, 100% { transform: translateX(0px) translateY(0px); }
+    50% { transform: translateX(12px) translateY(-10px); }
+  }
+
+  .topic-shape-1 {
+    animation: topicFloat1 23s ease-in-out infinite;
+  }
+  
+  .topic-shape-2 {
+    animation: topicFloat2 29s ease-in-out infinite;
+  }
+  
+  .topic-shape-3 {
+    animation: topicFloat3 20s ease-in-out infinite;
+  }
+  
+  .topic-shape-4 {
+    animation: topicFloat4 25s ease-in-out infinite;
+  }
+  
+  .topic-shape-5 {
+    animation: topicFloat5 17s ease-in-out infinite;
+  }
+  
+  .topic-shape-6 {
+    animation: topicFloat6 22s ease-in-out infinite;
+  }
+  
+  .topic-shape-7 {
+    animation: topicFloat7 19s ease-in-out infinite;
+  }
+</style>

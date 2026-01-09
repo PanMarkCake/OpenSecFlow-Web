@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import MainLayout from '../layouts/MainLayout.astro';
+import VideoCard from '../components/VideoCard.astro';
+
+const videosCollection = await getCollection('videos');
+const videosData = videosCollection[0]?.data;
+const videos = videosData?.videos || [];
+---
+
+<MainLayout
+  title="Content - OpenSecFlow"
+  description="Watch our collection of security tutorials, web development guides, and best practices content."
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-navy-800 mb-4">
+        Content Gallery
+      </h1>
+      <p class="text-lg text-slate-blue-600 max-w-2xl mx-auto">
+        Explore our collection of security tutorials, web development guides, and best practices
+      </p>
+    </div>
+
+    {videos.length === 0 ? (
+      <div class="text-center py-12">
+        <p class="text-slate-blue-600">
+          No content available yet. Check back soon!
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {videos.map((video) => (
+          <VideoCard
+            title={video.title}
+            description={video.description}
+            url={video.url}
+            thumbnail={video.thumbnail}
+            platform={video.platform}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+</MainLayout>
+

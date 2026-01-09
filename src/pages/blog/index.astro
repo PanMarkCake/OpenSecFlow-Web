@@ -1,0 +1,152 @@
+---
+import { db, BlogPosts } from 'astro:db';
+import { desc } from 'astro:db';
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const blogPosts = await db.select().from(BlogPosts).orderBy(desc(BlogPosts.pubDate));
+---
+
+<MainLayout
+  title="Blog - OpenSecFlow"
+  description="Read the latest articles and insights from OpenSecFlow on security, web development, and best practices."
+>
+  <!-- Animated Background -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-blue-50 via-white to-sky-50"></div>
+    <!-- Animated SVG shapes -->
+    <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="blogGrad1" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="blogGrad2" gradientUnits="userSpaceOnUse" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgb(18,57,104)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="rgb(65,97,133)" stop-opacity="0.15"/>
+        </linearGradient>
+        <linearGradient id="blogGrad3" gradientUnits="userSpaceOnUse" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="rgb(72,104,141)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="rgb(90,171,206)" stop-opacity="0.1"/>
+        </linearGradient>
+      </defs>
+      <!-- Floating shapes -->
+      <path class="blog-shape-1" d="M 0 200 Q 360 150 720 200 T 1440 200 L 1440 0 L 0 0 Z" fill="url(#blogGrad1)"/>
+      <path class="blog-shape-2" d="M 0 700 Q 480 650 960 700 T 1920 700 L 1920 900 L 0 900 Z" fill="url(#blogGrad2)"/>
+      <circle class="blog-shape-3" cx="1200" cy="300" r="200" fill="url(#blogGrad3)"/>
+      <circle class="blog-shape-4" cx="200" cy="600" r="150" fill="url(#blogGrad1)"/>
+      <path class="blog-shape-5" d="M 800 0 Q 900 100 1000 0 L 1000 200 Q 900 100 800 200 Z" fill="url(#blogGrad2)"/>
+    </svg>
+    <!-- Additional gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-blue-50/50"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-navy-800 mb-4">
+        Blog
+      </h1>
+      <p class="text-lg text-slate-blue-600 max-w-2xl mx-auto">
+        Latest articles and insights on security, web development, and best practices
+      </p>
+    </div>
+
+    {blogPosts.length === 0 ? (
+      <div class="text-center py-12">
+        <p class="text-slate-blue-600">
+          No blog posts yet. Check back soon!
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {blogPosts.map((post) => (
+          <a
+            href={`/blog/${post.slug}`}
+            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-slate-blue-200 hover:border-sky-400 transform hover:-translate-y-1 group"
+          >
+            {post.heroImage && (
+              <div class="aspect-video bg-slate-blue-100 overflow-hidden">
+                <img
+                  src={post.heroImage}
+                  alt={post.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                  width="400"
+                  height="225"
+                />
+              </div>
+            )}
+            <div class="p-6">
+              <h2 class="text-xl font-semibold text-navy-800 mb-2 group-hover:text-sky-500 transition-colors">
+                {post.title}
+              </h2>
+              <p class="text-slate-blue-600 text-sm mb-4 line-clamp-2">
+                {post.description}
+              </p>
+              <div class="flex items-center justify-between text-sm text-slate-blue-500">
+                <time datetime={post.pubDate.toISOString()}>
+                  {post.pubDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+                {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
+                  <span class="text-sky-500 font-medium">
+                    {post.tags[0]}
+                  </span>
+                )}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</MainLayout>
+
+<style>
+  @keyframes float1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-30px) translateX(20px); }
+  }
+  
+  @keyframes float2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(20px) translateX(-15px); }
+  }
+  
+  @keyframes float3 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-25px) scale(1.1); }
+  }
+  
+  @keyframes float4 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(15px) scale(0.9); }
+  }
+  
+  @keyframes float5 {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50% { transform: translateX(30px) rotate(5deg); }
+  }
+
+  .blog-shape-1 {
+    animation: float1 20s ease-in-out infinite;
+  }
+  
+  .blog-shape-2 {
+    animation: float2 25s ease-in-out infinite;
+  }
+  
+  .blog-shape-3 {
+    animation: float3 18s ease-in-out infinite;
+  }
+  
+  .blog-shape-4 {
+    animation: float4 22s ease-in-out infinite;
+  }
+  
+  .blog-shape-5 {
+    animation: float5 15s ease-in-out infinite;
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  url: string;
+  thumbnail?: string;
+  platform: 'youtube' | 'vimeo';
+}
+
+const { title, description, url, thumbnail, platform } = Astro.props;
+
+const getEmbedUrl = (url: string, platform: string) => {
+  if (platform === 'youtube') {
+    const videoId = url.includes('youtu.be/')
+      ? url.split('youtu.be/')[1].split('?')[0]
+      : url.split('v=')[1]?.split('&')[0];
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+  } else if (platform === 'vimeo') {
+    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+    return videoId ? `https://player.vimeo.com/video/${videoId}` : url;
+  }
+  return url;
+};
+
+const embedUrl = getEmbedUrl(url, platform);
+---
+
+<div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-slate-blue-200 hover:border-sky-400 transform hover:-translate-y-1">
+  <div class="aspect-video bg-slate-blue-100">
+    <iframe
+      src={embedUrl}
+      title={title}
+      class="w-full h-full"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    ></iframe>
+  </div>
+  <div class="p-6">
+    <h3 class="text-xl font-semibold text-navy-800 mb-2">
+      {title}
+    </h3>
+    <p class="text-slate-blue-600 text-sm">
+      {description}
+    </p>
+  </div>
+</div>
+

@@ -2,8 +2,7 @@ name: Deploy Astro site to Cloudflare Pages
 
 on:
   push:
-    branches:  
-    - main 
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -26,17 +25,10 @@ jobs:
       - name: Build Astro site
         run: npm run build
 
-      - name: Install Wrangler CLI
-        run: npm install -g wrangler@4
-
       - name: Deploy to Cloudflare Pages
-        env:
-          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          # confirm wrangler is available
-          wrangler --version
-          # list pages projects to help debug (optional)
-          wrangler pages project list --account-id "$CF_ACCOUNT_ID" || true
-          # deploy (add --commit-dirty if you hit the dirty working tree warning)
-          wrangler pages deploy dist --project-name=opensecflow --branch=main --commit-dirty=true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=opensecflow
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

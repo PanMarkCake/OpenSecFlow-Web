@@ -43,4 +43,4 @@ export default async function addArticle() {
     throw error;
   }
 }
-// npx astro db execute db/seed.ts to add the new file
+// npx astro db execute scripts/seed.ts to add the new file

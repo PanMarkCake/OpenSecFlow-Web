@@ -39,7 +39,7 @@ This method is best if you prefer writing articles in markdown files.
 
 3. **Run the seed script** to add it to the database:
    ```bash
-   npx astro db execute db/seed.ts
+   npx astro db execute scripts/seed.ts
    ```
 
    The seed script will:

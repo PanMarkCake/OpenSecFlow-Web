@@ -1,0 +1,32 @@
+---
+import SchemaLD from '../SchemaLD.astro';
+
+interface Props {
+  siteURL?: string;
+}
+
+const { siteURL = 'https://opensecflow.io' } = Astro.props;
+
+const webSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'OpenSecFlow',
+  url: siteURL,
+  description: 'Network Automation with NetDriver - Open-source NetDevOps framework for Python',
+  publisher: {
+    '@type': 'Organization',
+    name: 'OpenSecFlow',
+    url: siteURL,
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${siteURL}/blog?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+
+<SchemaLD schema={webSiteSchema} />

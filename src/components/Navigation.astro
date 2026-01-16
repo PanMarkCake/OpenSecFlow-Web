@@ -5,6 +5,13 @@ const navItems = [
   { href: '/', label: 'Home' },
   { href: '/blog', label: 'Blog' },
 ];
+
+const tutorialSections = [
+  { slug: 'netdriver', label: 'NetDriver', href: '/tutorial/netdriver' },
+  // Add more sections here as needed
+];
+
+const isTutorialActive = currentPath === '/tutorial' || currentPath.startsWith('/tutorial/');
 ---
 
 <nav class="relative z-20 bg-white shadow-md border-b-2 border-slate-blue-200">
@@ -24,6 +31,39 @@ const navItems = [
             {item.label}
           </a>
         ))}
+        
+        <!-- Tutorial Dropdown -->
+        <div class="relative group">
+          <a
+            href="/tutorial/netdriver"
+            class={`px-6 py-2.5 text-base font-semibold transition-all duration-300 rounded-lg flex items-center justify-between gap-2 ${
+              isTutorialActive
+                ? 'text-white bg-navy-700 shadow-lg'
+                : 'text-navy-700 hover:text-white hover:bg-sky-500'
+            }`}
+          >
+            <span>Tutorial</span>
+            <svg class="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </a>
+          <div class="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-2xl border-2 border-slate-blue-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
+            <div class="">
+              {tutorialSections.map((section) => (
+                <a
+                  href={section.href}
+                  class={`block px-6 py-2.5 text-base font-semibold transition-all duration-200 ${
+                    currentPath === section.href || currentPath.startsWith(section.href + '/')
+                      ? 'bg-navy-700 text-white'
+                      : 'text-navy-700 hover:bg-sky-100 hover:text-sky-600'
+                  }`}
+                >
+                  {section.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Mobile menu button -->
@@ -65,6 +105,23 @@ const navItems = [
             {item.label}
           </a>
         ))}
+        <div class="px-4 py-2">
+          <div class="text-base font-semibold text-navy-700 mb-2">Tutorial</div>
+          <div class="flex flex-col space-y-1 ml-4">
+            {tutorialSections.map((section) => (
+              <a
+                href={section.href}
+                class={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                  currentPath === section.href || currentPath.startsWith(section.href + '/')
+                    ? 'text-white bg-navy-700'
+                    : 'text-navy-700 hover:bg-sky-100'
+                }`}
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   </div>

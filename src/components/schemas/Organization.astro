@@ -1,0 +1,39 @@
+---
+import SchemaLD from '../SchemaLD.astro';
+
+interface Props {
+  siteURL?: string;
+}
+
+const { siteURL = 'https://opensecflow.io' } = Astro.props;
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'OpenSecFlow',
+  url: siteURL,
+  logo: new URL('/osfLogoFull.svg', siteURL).toString(),
+  description: 'OpenSecFlow is an open-source network developer community dedicated to building an open and secure ecosystem for network and cybersecurity automation.',
+  foundingDate: '2024',
+  founders: [
+    {
+      '@type': 'Organization',
+      name: 'Byntra.se',
+    },
+    {
+      '@type': 'Organization',
+      name: 'SkyCloud',
+    },
+  ],
+  sameAs: [
+    'https://github.com/OpenSecFlow',
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'Technical Support',
+    url: siteURL,
+  },
+};
+---
+
+<SchemaLD schema={organizationSchema} />

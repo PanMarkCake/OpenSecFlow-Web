@@ -3,6 +3,7 @@ import { db, BlogPosts } from 'astro:db';
 import { eq } from 'astro:db';
 import MainLayout from '../../layouts/MainLayout.astro';
 import SchemaLD from '../../components/SchemaLD.astro';
+import BreadcrumbList from '../../components/schemas/BreadcrumbList.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
 import { marked } from 'marked';
 
@@ -21,7 +22,7 @@ interface Props {
 const { post } = Astro.props;
 const htmlContent = marked.parse(post.body);
 
-const siteURL = Astro.site || 'https://opensecflow.com';
+const siteURL = Astro.site || 'https://opensecflow.io';
 const articleURL = new URL(`/blog/${post.slug}`, siteURL).toString();
 
 // Extract keywords from tags for about/mentions
@@ -31,7 +32,24 @@ const aboutKeywords = keywords.filter(tag =>
    'asyncssh', 'cli', 'rest', 'api', 'network', 'testing', 'simulation'].includes(tag.toLowerCase())
 );
 
-// TechArticle Schema
+// Calculate word count and reading time
+const textContent = post.body.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+const wordCount = textContent.split(' ').length;
+const readingTimeMinutes = Math.ceil(wordCount / 200); // Average reading speed: 200 words per minute
+
+// Determine article section from tags
+const articleSection = keywords.find(tag => 
+  ['scaling-automation', 'legacy-integration', 'testing-simulation'].includes(tag)
+) || 'General';
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Blog', url: '/blog' },
+  { name: post.title, url: `/blog/${post.slug}` },
+];
+
+// Enhanced TechArticle Schema
 const techArticleSchema = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
@@ -40,7 +58,7 @@ const techArticleSchema = {
   datePublished: post.pubDate.toISOString(),
   dateModified: post.updatedDate ? post.updatedDate.toISOString() : post.pubDate.toISOString(),
   author: {
-    '@type': 'Organization',
+    '@type': 'Person',
     name: 'OpenSecFlow',
     url: siteURL,
   },
@@ -48,12 +66,20 @@ const techArticleSchema = {
     '@type': 'Organization',
     name: 'OpenSecFlow',
     url: siteURL,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/osfLogoFull.svg', siteURL).toString(),
+    },
   },
   url: articleURL,
   mainEntityOfPage: {
     '@type': 'WebPage',
     '@id': articleURL,
   },
+  articleSection: articleSection,
+  keywords: keywords.join(', '),
+  wordCount: wordCount,
+  timeRequired: `PT${readingTimeMinutes}M`,
   about: aboutKeywords.map(keyword => ({
     '@type': 'Thing',
     name: keyword,
@@ -63,7 +89,11 @@ const techArticleSchema = {
     name: keyword,
   })),
   ...(post.heroImage && {
-    image: new URL(post.heroImage, siteURL).toString(),
+    image: {
+      '@type': 'ImageObject',
+      url: new URL(post.heroImage, siteURL).toString(),
+      caption: post.title,
+    },
   }),
 };
 ---
@@ -74,7 +104,16 @@ const techArticleSchema = {
   canonicalURL={Astro.url}
   ogType="article"
   ogImage={post.heroImage || undefined}
+  ogImageAlt={post.title}
+  articleAuthor="OpenSecFlow"
+  articlePublishedTime={post.pubDate}
+  articleModifiedTime={post.updatedDate || post.pubDate}
+  articleSection={articleSection}
+  articleTags={keywords}
+  keywords={keywords}
+  authorName="OpenSecFlow"
 >
+  <BreadcrumbList items={breadcrumbItems} siteURL={siteURL} />
   <SchemaLD schema={techArticleSchema} />
   
   <!-- Animated Background -->

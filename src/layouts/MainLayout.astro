@@ -9,8 +9,18 @@ interface Props {
   description: string;
   canonicalURL?: URL | string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: 'website' | 'article';
   noindex?: boolean;
+  keywords?: string[];
+  articleAuthor?: string;
+  articlePublishedTime?: string | Date;
+  articleModifiedTime?: string | Date;
+  articleSection?: string;
+  articleTags?: string[];
+  authorName?: string;
+  authorUrl?: string;
+  themeColor?: string;
 }
 
 const {
@@ -18,8 +28,18 @@ const {
   description,
   canonicalURL,
   ogImage,
+  ogImageAlt,
   ogType,
   noindex,
+  keywords,
+  articleAuthor,
+  articlePublishedTime,
+  articleModifiedTime,
+  articleSection,
+  articleTags,
+  authorName,
+  authorUrl,
+  themeColor = '#123968',
 } = Astro.props;
 ---
 
@@ -28,7 +48,19 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" sizes="32x32" href="/svgviewer-outputB.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/svgviewer-outputB.svg" />
+    <link rel="apple-touch-icon" href="/svgviewer-outputB.svg" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://github.com" crossorigin />
+    <link rel="dns-prefetch" href="https://github.com" />
+    
     <meta name="generator" content={Astro.generator} />
     <ViewTransitions />
     <SEO
@@ -36,8 +68,18 @@ const {
       description={description}
       canonicalURL={canonicalURL}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
       ogType={ogType}
       noindex={noindex}
+      keywords={keywords}
+      articleAuthor={articleAuthor}
+      articlePublishedTime={articlePublishedTime}
+      articleModifiedTime={articleModifiedTime}
+      articleSection={articleSection}
+      articleTags={articleTags}
+      authorName={authorName}
+      authorUrl={authorUrl}
+      themeColor={themeColor}
     />
   </head>
   <body class="min-h-screen bg-white">

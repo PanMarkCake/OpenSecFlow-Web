@@ -4,9 +4,22 @@ interface Props {
   description: string;
   canonicalURL?: URL | string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: 'website' | 'article';
   twitterCard?: 'summary' | 'summary_large_image';
   noindex?: boolean;
+  keywords?: string[];
+  // Article-specific props
+  articleAuthor?: string;
+  articlePublishedTime?: string | Date;
+  articleModifiedTime?: string | Date;
+  articleSection?: string;
+  articleTags?: string[];
+  // Author info
+  authorName?: string;
+  authorUrl?: string;
+  // Theme color
+  themeColor?: string;
 }
 
 const {
@@ -14,23 +27,54 @@ const {
   description,
   canonicalURL,
   ogImage = '/og-image.jpg',
+  ogImageAlt,
   ogType = 'website',
   twitterCard = 'summary_large_image',
   noindex = false,
+  keywords,
+  articleAuthor,
+  articlePublishedTime,
+  articleModifiedTime,
+  articleSection,
+  articleTags,
+  authorName = 'OpenSecFlow',
+  authorUrl,
+  themeColor = '#123968',
 } = Astro.props;
 
-const siteURL = Astro.site || 'https://opensecflow.com';
+const siteURL = Astro.site || 'https://opensecflow.io';
 const fullCanonicalURL = canonicalURL
   ? new URL(canonicalURL, siteURL)
   : new URL(Astro.url.pathname, siteURL);
 const fullOgImage = new URL(ogImage, siteURL).toString();
+
+// Format dates for meta tags
+const formatDate = (date: string | Date | undefined): string | undefined => {
+  if (!date) return undefined;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toISOString();
+};
+
+const publishedTime = formatDate(articlePublishedTime);
+const modifiedTime = formatDate(articleModifiedTime);
 ---
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
-{noindex && <meta name="robots" content="noindex, nofollow" />}
+{keywords && keywords.length > 0 && (
+  <meta name="keywords" content={keywords.join(', ')} />
+)}
+{authorName && <meta name="author" content={authorName} />}
+{themeColor && <meta name="theme-color" content={themeColor} />}
+
+<!-- Robots Meta -->
+{noindex ? (
+  <meta name="robots" content="noindex, nofollow" />
+) : (
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+)}
 
 <!-- Canonical URL -->
 <link rel="canonical" href={fullCanonicalURL.toString()} />
@@ -41,7 +85,22 @@ const fullOgImage = new URL(ogImage, siteURL).toString();
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={fullOgImage} />
+{ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
 <meta property="og:site_name" content="OpenSecFlow" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Article-specific Open Graph tags -->
+{ogType === 'article' && (
+  <>
+    {articleAuthor && <meta property="article:author" content={articleAuthor} />}
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    {articleSection && <meta property="article:section" content={articleSection} />}
+    {articleTags && articleTags.map((tag) => (
+      <meta property="article:tag" content={tag} />
+    ))}
+  </>
+)}
 
 <!-- Twitter -->
 <meta name="twitter:card" content={twitterCard} />
@@ -49,4 +108,6 @@ const fullOgImage = new URL(ogImage, siteURL).toString();
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={fullOgImage} />
+{authorName && <meta name="twitter:creator" content={authorName} />}
+{authorName && <meta name="twitter:site" content="@OpenSecFlow" />}
 

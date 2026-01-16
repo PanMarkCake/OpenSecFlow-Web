@@ -1,17 +1,81 @@
 ---
 import { getCollection } from 'astro:content';
 import MainLayout from '../layouts/MainLayout.astro';
+import SchemaLD from '../components/SchemaLD.astro';
 import VideoCard from '../components/VideoCard.astro';
 
 const videosCollection = await getCollection('videos');
 const videosData = videosCollection[0]?.data;
 const videos = videosData?.videos || [];
+
+const siteURL = Astro.site || 'https://opensecflow.io';
+const videosPageURL = new URL('/videos', siteURL).toString();
+
+// Create VideoObject schemas for each video
+const videoSchemas = videos.map((video) => {
+  const videoSchema: any = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: video.title,
+    description: video.description,
+    contentUrl: video.url,
+    embedUrl: video.url,
+    thumbnailUrl: video.thumbnail || new URL('/osfLogoFull.svg', siteURL).toString(),
+    uploadDate: video.publishedDate ? new Date(video.publishedDate).toISOString() : undefined,
+    duration: video.duration,
+    publisher: {
+      '@type': 'Organization',
+      name: 'OpenSecFlow',
+      url: siteURL,
+      logo: {
+        '@type': 'ImageObject',
+        url: new URL('/osfLogoFull.svg', siteURL).toString(),
+      },
+    },
+  };
+
+  // Add platform-specific properties
+  if (video.platform === 'youtube') {
+    videoSchema.regionsAllowed = 'US';
+  }
+
+  return videoSchema;
+});
+
+// CollectionPage schema for videos listing
+const collectionPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'OpenSecFlow Content Gallery',
+  description: 'Collection of security tutorials, web development guides, and best practices content',
+  url: videosPageURL,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: videos.length,
+    itemListElement: videos.map((video, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'VideoObject',
+        name: video.title,
+        description: video.description,
+        contentUrl: video.url,
+        thumbnailUrl: video.thumbnail || new URL('/osfLogoFull.svg', siteURL).toString(),
+      },
+    })),
+  },
+};
 ---
 
 <MainLayout
   title="Content - OpenSecFlow"
   description="Watch our collection of security tutorials, web development guides, and best practices content."
+  keywords={['videos', 'tutorials', 'security', 'web development', 'best practices']}
 >
+  <SchemaLD schema={collectionPageSchema} />
+  {videoSchemas.map((schema) => (
+    <SchemaLD schema={schema} />
+  ))}
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-navy-800 mb-4">

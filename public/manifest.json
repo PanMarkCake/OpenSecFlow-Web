@@ -1,0 +1,23 @@
+{
+  "name": "OpenSecFlow - Network Automation",
+  "short_name": "OpenSecFlow",
+  "description": "Network Automation with NetDriver - Open-source NetDevOps framework for Python",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#123968",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/svgviewer-outputB.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

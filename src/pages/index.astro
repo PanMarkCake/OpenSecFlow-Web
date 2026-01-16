@@ -4,8 +4,10 @@ import Hero from '../components/Hero.astro';
 import FeaturesGrid from '../components/FeaturesGrid.astro';
 import EngineeringChallenges from '../components/EngineeringChallenges.astro';
 import SchemaLD from '../components/SchemaLD.astro';
+import Organization from '../components/schemas/Organization.astro';
+import WebSite from '../components/schemas/WebSite.astro';
 
-const siteURL = Astro.site || 'https://opensecflow.com';
+const siteURL = Astro.site || 'https://opensecflow.io';
 
 // SoftwareApplication Schema
 const softwareSchema = {
@@ -102,6 +104,8 @@ const valueProposition = {
   title="OpenSecFlow - Network Automation with Netdriver"
   description="Netdriver is a free, open-source NetDevOps framework for Python. Built on Netmiko by the OpenSecFlow community for high-performance network automation."
 >
+  <Organization siteURL={siteURL} />
+  <WebSite siteURL={siteURL} />
   <SchemaLD schema={softwareSchema} />
   <SchemaLD schema={faqSchema} />
   <Hero
@@ -118,8 +122,7 @@ const valueProposition = {
           What is OpenSecFlow?
         </h2>
         <p class="text-xl text-slate-blue-600 font-semibold max-w-3xl mx-auto">
-          OpenSecFlow is a group of developers and network engineers collaborating together to create a community 
-          create network-automation tools that will assist in driving the future of network automation.
+          OpenSecFlow is an open-source network developer community co-founded by Byntra.se and SkyCloud, dedicated to building an open and secure ecosystem for network and cybersecurity automation.
           
         </p>
       </div>
@@ -134,7 +137,7 @@ const valueProposition = {
     <div class="flex flex-col  bg-[#c0d1df] to-slate-blue-50 border border-slate-200  shadow-lg  items-center">
       <div class="">
         <!-- Example Image or Icon placeholder -->
-        <img src="public/pexels-richardstefun-1047346.jpg" alt="The Core Vision" class="w-full" loading="lazy" width="800" height="600">
+        <img src="/pexels-richardstefun-1047346.jpg" alt="The Core Vision" class="w-full" loading="lazy" width="800" height="600">
       </div>
       <div class="text-center p-8">
       <h3 class="text-2xl font-bold text-white mb-2">The Core Vision</h3>
@@ -149,7 +152,7 @@ const valueProposition = {
         <!-- Example Image or Icon placeholder -->
         <div class="">
           <!-- Example Image or Icon placeholder -->
-          <img src="public/pexels-stefan-239928581-32997843.jpg" alt="The Roadmap" class="w-full" loading="lazy" width="800" height="600">
+          <img src="/pexels-stefan-239928581-32997843.jpg" alt="The Roadmap" class="w-full" loading="lazy" width="800" height="600">
         </div>
       </div>
       <div class="text-center p-8">
@@ -165,7 +168,7 @@ const valueProposition = {
         <!-- Example Image or Icon placeholder -->
         <div class="">
           <!-- Example Image or Icon placeholder -->
-          <img src="public/pexels-mikhail-nilov-7988210.jpg" alt="A Community of Learnin" class="w-full" loading="lazy" width="800" height="600">
+          <img src="/pexels-mikhail-nilov-7988210.jpg" alt="A Community of Learning" class="w-full" loading="lazy" width="800" height="600">
         </div>
       </div>
       <div class="text-center p-8">
@@ -181,7 +184,7 @@ const valueProposition = {
         <!-- Example Image or Icon placeholder -->
         <div class="">
           <!-- Example Image or Icon placeholder -->
-          <img src="public/pexels-pixabay-60504.jpg" alt="Security" class="w-full" loading="lazy" width="800" height="600">
+          <img src="/pexels-pixabay-60504.jpg" alt="Security" class="w-full" loading="lazy" width="800" height="600">
         </div>
       </div>
       <div class="text-center p-8">

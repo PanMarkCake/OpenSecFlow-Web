@@ -3,6 +3,7 @@ import { db, BlogPosts } from 'astro:db';
 import { eq } from 'astro:db';
 import MainLayout from '../../../layouts/MainLayout.astro';
 import SchemaLD from '../../../components/SchemaLD.astro';
+import BreadcrumbList from '../../../components/schemas/BreadcrumbList.astro';
 import RelatedContent from '../../../components/RelatedContent.astro';
 import { marked } from 'marked';
 
@@ -52,7 +53,7 @@ const clusterNames: Record<string, string> = {
 
 const clusterName = clusterNames[cluster] || cluster;
 
-const siteURL = Astro.site || 'https://opensecflow.com';
+const siteURL = Astro.site || 'https://opensecflow.io';
 const articleURL = new URL(`/topics/${cluster}/${post.slug}`, siteURL).toString();
 
 // Extract keywords from tags for about/mentions
@@ -62,7 +63,44 @@ const aboutKeywords = keywords.filter(tag =>
    'asyncssh', 'cli', 'rest', 'api', 'network', 'testing', 'simulation'].includes(tag.toLowerCase())
 );
 
-// TechArticle Schema
+// Calculate word count and reading time
+const textContent = post.body.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+const wordCount = textContent.split(' ').length;
+const readingTimeMinutes = Math.ceil(wordCount / 200);
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Topics', url: '/topics' },
+  { name: clusterName, url: `/topics/${cluster}` },
+  { name: post.title, url: `/topics/${cluster}/${post.slug}` },
+];
+
+// Topic-specific FAQ schema
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: `What is ${clusterName} in network automation?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: post.description,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: `How does NetDriver help with ${clusterName.toLowerCase()}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `NetDriver provides tools and frameworks specifically designed for ${clusterName.toLowerCase()} in network automation environments, enabling efficient and scalable solutions.`,
+      },
+    },
+  ],
+};
+
+// Enhanced TechArticle Schema
 const techArticleSchema = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
@@ -71,7 +109,7 @@ const techArticleSchema = {
   datePublished: post.pubDate.toISOString(),
   dateModified: post.updatedDate ? post.updatedDate.toISOString() : post.pubDate.toISOString(),
   author: {
-    '@type': 'Organization',
+    '@type': 'Person',
     name: 'OpenSecFlow',
     url: siteURL,
   },
@@ -79,12 +117,20 @@ const techArticleSchema = {
     '@type': 'Organization',
     name: 'OpenSecFlow',
     url: siteURL,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/osfLogoFull.svg', siteURL).toString(),
+    },
   },
   url: articleURL,
   mainEntityOfPage: {
     '@type': 'WebPage',
     '@id': articleURL,
   },
+  articleSection: clusterName,
+  keywords: keywords.join(', '),
+  wordCount: wordCount,
+  timeRequired: `PT${readingTimeMinutes}M`,
   about: aboutKeywords.map(keyword => ({
     '@type': 'Thing',
     name: keyword,
@@ -94,7 +140,11 @@ const techArticleSchema = {
     name: keyword,
   })),
   ...(post.heroImage && {
-    image: new URL(post.heroImage, siteURL).toString(),
+    image: {
+      '@type': 'ImageObject',
+      url: new URL(post.heroImage, siteURL).toString(),
+      caption: post.title,
+    },
   }),
 };
 ---
@@ -105,8 +155,18 @@ const techArticleSchema = {
   canonicalURL={Astro.url}
   ogType="article"
   ogImage={post.heroImage || undefined}
+  ogImageAlt={post.title}
+  articleAuthor="OpenSecFlow"
+  articlePublishedTime={post.pubDate}
+  articleModifiedTime={post.updatedDate || post.pubDate}
+  articleSection={clusterName}
+  articleTags={keywords}
+  keywords={keywords}
+  authorName="OpenSecFlow"
 >
+  <BreadcrumbList items={breadcrumbItems} siteURL={siteURL} />
   <SchemaLD schema={techArticleSchema} />
+  <SchemaLD schema={faqSchema} />
   
   <!-- Animated Background -->
   <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">

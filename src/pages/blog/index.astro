@@ -2,14 +2,48 @@
 import { db, BlogPosts } from 'astro:db';
 import { desc } from 'astro:db';
 import MainLayout from '../../layouts/MainLayout.astro';
+import SchemaLD from '../../components/SchemaLD.astro';
 
 const blogPosts = await db.select().from(BlogPosts).orderBy(desc(BlogPosts.pubDate));
+
+const siteURL = Astro.site || 'https://opensecflow.io';
+
+// CollectionPage Schema for blog listing
+const collectionPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'OpenSecFlow Blog',
+  description: 'Latest articles and insights from OpenSecFlow on security, web development, and best practices',
+  url: new URL('/blog', siteURL).toString(),
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: blogPosts.length,
+    itemListElement: blogPosts.map((post, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'TechArticle',
+        '@id': new URL(`/blog/${post.slug}`, siteURL).toString(),
+        headline: post.title,
+        description: post.description,
+        datePublished: post.pubDate.toISOString(),
+        ...(post.updatedDate && {
+          dateModified: post.updatedDate.toISOString(),
+        }),
+        ...(post.heroImage && {
+          image: new URL(post.heroImage, siteURL).toString(),
+        }),
+      },
+    })),
+  },
+};
 ---
 
 <MainLayout
   title="Blog - OpenSecFlow"
   description="Read the latest articles and insights from OpenSecFlow on security, web development, and best practices."
 >
+  <SchemaLD schema={collectionPageSchema} />
   <!-- Animated Background -->
   <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
     <div class="absolute inset-0 bg-gradient-to-br from-slate-blue-50 via-white to-sky-50"></div>

@@ -16,6 +16,7 @@ const articleData = {
   updatedDate: null, // Optional: new Date('2024-01-26') if updated
   heroImage: null, // Optional: '/path/to/image.jpg'
   tags: ['tag1', 'tag2'], // Array of tags
+  externalLink: null, // Optional: 'https://example.com/original-article' if reposted/summarized
   body: `# Your Article Title
 
 Write your markdown content here.

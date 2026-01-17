@@ -2,10 +2,18 @@
 import MainLayout from '../../../layouts/MainLayout.astro';
 import SchemaLD from '../../../components/SchemaLD.astro';
 import BreadcrumbList from '../../../components/schemas/BreadcrumbList.astro';
+import { marked } from 'marked';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import 'prismjs/themes/prism-tomorrow.css';
 
 const siteURL = Astro.site?.toString() || 'https://opensecflow.io';
 const tutorialURL = new URL('/tutorial/netdriver', siteURL).toString();
+
+// Read and parse markdown file
+const markdownPath = join(process.cwd(), 'netdriver-5min-quickstart-en.md');
+const markdownContent = readFileSync(markdownPath, 'utf-8');
+const htmlContent = marked.parse(markdownContent);
 
 // Breadcrumb items
 const breadcrumbItems = [
@@ -18,19 +26,19 @@ const breadcrumbItems = [
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Get Started with NetDriver Agent',
-  description: 'Learn how to install, configure, and use NetDriver Agent for network automation via REST API',
+  name: 'NetDriver Agent 5-Minute Quickstart: Making Network Automation as Simple as Calling an API',
+  description: 'Launch NetDriver with Docker and complete your first network device configuration in 5 minutes via HTTP API! No need to write SSH connection code, no need to handle complex exceptions - everything is as simple as calling a REST API.',
   image: new URL('/osfLogoFull.svg', siteURL).toString(),
   estimatedCost: {
     '@type': 'MonetaryAmount',
     currency: 'USD',
     value: '0',
   },
-  totalTime: 'PT30M',
+  totalTime: 'PT5M',
   tool: [
     {
       '@type': 'HowToTool',
-      name: 'Python 3.8+',
+      name: 'Docker',
     },
     {
       '@type': 'HowToTool',
@@ -45,48 +53,23 @@ const howToSchema = {
     {
       '@type': 'HowToStep',
       position: 1,
-      name: 'Introduction',
-      text: 'Learn about NetDriver Agent features including device connectivity testing, command execution, session management, and command queue.',
-      url: `${tutorialURL}#introduction`,
+      name: 'Launch NetDriver Agent',
+      text: 'Create configuration directory, download configuration file, and launch NetDriver Agent using Docker. Verify successful startup by checking container status and calling the health API endpoint.',
+      url: `${tutorialURL}#step-1-launch-netdriver-agent-1-minute`,
     },
     {
       '@type': 'HowToStep',
       position: 2,
-      name: 'Installation',
-      text: 'Install NetDriver Agent via PyPI or Docker. Create configuration directory and download default configuration file.',
-      url: `${tutorialURL}#installation`,
-      itemListElement: [
-        {
-          '@type': 'HowToDirection',
-          text: 'Create configuration directory: mkdir -p config/agent logs',
-        },
-        {
-          '@type': 'HowToDirection',
-          text: 'Download default configuration file from GitHub',
-        },
-        {
-          '@type': 'HowToDirection',
-          text: 'Install via PyPI: pip install netdriver-agent',
-        },
-        {
-          '@type': 'HowToDirection',
-          text: 'Or install via Docker using the provided Dockerfile',
-        },
-      ],
+      name: 'Test Device Connection',
+      text: 'Test SSH connections to network devices (Paloalto PA and Juniper SRX) via RESTful API using the /api/v1/connect endpoint. Verify connection parameters and understand the response format.',
+      url: `${tutorialURL}#step-2-test-device-connection-1-minute`,
     },
     {
       '@type': 'HowToStep',
       position: 3,
-      name: 'Configuration',
-      text: 'Configure the agent by editing config/agent/agent.yml with your settings for API, logging, session management, and SSH parameters.',
-      url: `${tutorialURL}#configuration`,
-    },
-    {
-      '@type': 'HowToStep',
-      position: 4,
-      name: 'Using the REST API',
-      text: 'Use the REST API to connect to devices, execute commands, and manage sessions. Examples include connect endpoint, command execution with raw and textfsm templates.',
-      url: `${tutorialURL}#using-the-rest-api`,
+      name: 'Execute Your First Command',
+      text: 'Execute commands on network devices using the /api/v1/cmd endpoint. Learn to execute raw commands, use TextFSM templates for structured data parsing, and automatically switch between multiple execution modes (login/enable/config).',
+      url: `${tutorialURL}#step-3-execute-your-first-command-2-minutes`,
     },
   ],
 };
@@ -131,140 +114,12 @@ const faqSchema = {
   ],
 };
 
-// Code block content with curly braces to avoid Astro parsing issues
-const connectRequestCode = `curl -X 'POST' \\
-  'http://localhost:8000/api/v1/connect' \\
-  -H 'accept: application/json' \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-  "protocol": "ssh",
-  "ip": "192.168.60.99",
-  "port": 22,
-  "username": "admin",
-  "password": "admin",
-  "enable_password": "",
-  "vendor": "paloalto",
-  "model": "pa",
-  "version": "8.1.0",
-  "encode": "utf-8",
-  "vsys": "default",
-  "timeout": 60
-}'`;
-
-const connectResponseCode = `{
-  "code": "OK",
-  "msg": "Connection is alive"
-}`;
-
-const cmdRequestCode = `curl -X 'POST' \\
-  'http://localhost:8000/api/v1/cmd' \\
-  -H 'accept: application/json' \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-  "protocol": "ssh",
-  "ip": "192.168.60.99",
-  "port": 22,
-  "username": "admin",
-  "password": "admin",
-  "enable_password": "",
-  "vendor": "paloalto",
-  "model": "pa",
-  "version": "8.1.0",
-  "encode": "utf-8",
-  "vsys": "default",
-  "timeout": 60,
-  "continue_on_error": true,
-  "commands": [
-    {
-      "type": "raw",
-      "mode": "enable",
-      "command": "show system info",
-      "template": "",
-      "detail_output": true
-    }
-  ]
-}'`;
-
-const cmdResponseCode = `{
-  "code": "OK",
-  "msg": "",
-  "time": 0.08519816398620605,
-  "result": [
-    {
-      "ret_code": "OK",
-      "command": "show system info",
-      "ret": "\\u001b[Kadmin@pa-60.99> show system info\\n\\nhostname: pa-60.99\\nip-address: 192.168.60.99\\npublic-ip-address: unknown\\nnetmask: 255.255.255.0\\ndefault-gateway: 192.168.60.1\\nip-assignment: static\\nipv6-address: unknown\\nipv6-link-local-address: fe80::524d:13ff:fe00:600/64\\nipv6-default-gateway: \\nmac-address: 50:4d:13:00:06:00\\ntime: Fri Oct 31 18:23:30 2025\\nuptime: 0 days, 0:28:45\\nfamily: vm\\nmodel: PA-VM\\nserial: unknown\\nvm-mac-base: BA:DB:EE:FB:AD:00\\nvm-mac-count: 255\\nvm-uuid: 6A28E9C6-1288-4A90-89E1-FC1766012B98\\nvm-cpuid: KVM:63060000FDFB8B07\\nvm-license: none\\nvm-mode: KVM\\ncloud-mode: non-cloud\\nsw-version: 8.1.0\\nglobal-protect-client-package-version: 0.0.0\\napp-version: 769-4439\\napp-release-date: \\nav-version: 0\\nav-release-date: \\nthreat-version: 0\\nthreat-release-date: \\nwf-private-version: 0\\nwf-private-release-date: unknown\\nurl-db: paloaltonetworks\\nwildfire-version: 0\\nwildfire-release-date: \\nurl-filtering-version: 0000.00.00.000\\nglobal-protect-datafile-version: unknown\\nglobal-protect-datafile-release-date: unknown\\nglobal-protect-clientless-vpn-version: 0\\nglobal-protect-clientless-vpn-release-date: \\nlogdb-version: 8.1.8\\nplatform-family: vm\\nvpn-disable-mode: off\\nmulti-vsys: off\\noperational-mode: normal\\n\\nadmin@pa-60.99> "
-    }
-  ],
-  "output": "\\u001b[Kadmin@pa-60.99> show system info\\n\\nhostname: pa-60.99\\nip-address: 192.168.60.99\\npublic-ip-address: unknown\\nnetmask: 255.255.255.0\\ndefault-gateway: 192.168.60.1\\nip-assignment: static\\nipv6-address: unknown\\nipv6-link-local-address: fe80::524d:13ff:fe00:600/64\\nipv6-default-gateway: \\nmac-address: 50:4d:13:00:06:00\\ntime: Fri Oct 31 18:23:30 2025\\nuptime: 0 days, 0:28:45\\nfamily: vm\\nmodel: PA-VM\\nserial: unknown\\nvm-mac-base: BA:DB:EE:FB:AD:00\\nvm-mac-count: 255\\nvm-uuid: 6A28E9C6-1288-4A90-89E1-FC1766012B98\\nvm-cpuid: KVM:63060000FDFB8B07\\nvm-license: none\\nvm-mode: KVM\\ncloud-mode: non-cloud\\nsw-version: 8.1.0\\nglobal-protect-client-package-version: 0.0.0\\napp-version: 769-4439\\napp-release-date: \\nav-version: 0\\nav-release-date: \\nthreat-version: 0\\nthreat-release-date: \\nwf-private-version: 0\\nwf-private-release-date: unknown\\nurl-db: paloaltonetworks\\nwildfire-version: 0\\nwildfire-release-date: \\nurl-filtering-version: 0000.00.00.000\\nglobal-protect-datafile-version: unknown\\nglobal-protect-datafile-release-date: unknown\\nglobal-protect-clientless-vpn-version: 0\\nglobal-protect-clientless-vpn-release-date: \\nlogdb-version: 8.1.8\\nplatform-family: vm\\nvpn-disable-mode: off\\nmulti-vsys: off\\noperational-mode: normal\\n\\nadmin@pa-60.99> \\n===== end exec cmd: [show system info] 2025-10-31 10:23:30.633140 =====\\n"
-}`;
-
-const textfsmTemplateCode = `Value HOSTNAME (\\S+)
-Value IP(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})
-Value MODEL (\\S+)
-Value VERSION (\\S+)
-
-Start
-  ^hostname:\\s+\${HOSTNAME}
-  ^ip-address:\\s+\${IP}
-  ^model:\\s+\${MODEL}
-  ^sw-version:\\s+\${VERSION} -> Record`;
-
-const textfsmRequestCode = `curl -X 'POST' \\
-  'http://localhost:8000/api/v1/cmd' \\
-  -H 'accept: application/json' \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-  "protocol": "ssh",
-  "ip": "192.168.60.99",
-  "port": 22,
-  "username": "admin",
-  "password": "admin",
-  "enable_password": "",
-  "vendor": "paloalto",
-  "model": "pa",
-  "version": "8.1.0",
-  "encode": "utf-8",
-  "vsys": "default",
-  "timeout": 60,
-  "continue_on_error": true,
-  "commands": [
-    {
-      "type": "textfsm",
-      "mode": "enable",
-      "command": "show system info",
-      "template": "Value HOSTNAME (\\\\S+)\\nValue IP_ADDRESS (\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3})\\nValue MODEL (\\\\S+)\\nValue VERSION (\\\\S+)\\n\\nStart\\n  ^hostname:\\\\s+\${HOSTNAME}\\n  ^ip-address:\\\\s+\${IP_ADDRESS}\\n  ^model:\\\\s+\${MODEL}\\n  ^sw-version:\\\\s+\${VERSION} -> Record",
-      "detail_output": true
-    }
-  ]
-}'`;
-
-const textfsmResponseCode = `{
-  "code": "OK",
-  "msg": "",
-  "time": 0.06978988647460938,
-  "result": [
-    {
-      "ret_code": "OK",
-      "command": "show system info",
-      "ret": [
-        {
-          "HOSTNAME": "pa-60.99",
-          "IP_ADDRESS": "192.168.60.99",
-          "MODEL": "PA-VM",
-          "VERSION": "8.1.0"
-        }
-      ]
-    }
-  ],
-  "output": "\\u001b[Kadmin@pa-60.99> show system info\\n\\nhostname: pa-60.99\\nip-address: 192.168.60.99\\npublic-ip-address: unknown\\nnetmask: 255.255.255.0\\ndefault-gateway: 192.168.60.1\\nip-assignment: static\\nipv6-address: unknown\\nipv6-link-local-address: fe80::524d:13ff:fe00:600/64\\nipv6-default-gateway: \\nmac-address: 50:4d:13:00:06:00\\ntime: Fri Oct 31 18:59:21 2025\\nuptime: 0 days, 1:04:36\\nfamily: vm\\nmodel: PA-VM\\nserial: unknown\\nvm-mac-base: BA:DB:EE:FB:AD:00\\nvm-mac-count: 255\\nvm-uuid: 6A28E9C6-1288-4A90-89E1-FC1766012B98\\nvm-cpuid: KVM:63060000FDFB8B07\\nvm-license: none\\nvm-mode: KVM\\ncloud-mode: non-cloud\\nsw-version: 8.1.0\\nglobal-protect-client-package-version: 0.0.0\\napp-version: 769-4439\\napp-release-date: \\nav-version: 0\\nav-release-date: \\nthreat-version: 0\\nthreat-release-date: \\nwf-private-version: 0\\nwf-private-release-date: unknown\\nurl-db: paloaltonetworks\\nwildfire-version: 0\\nwildfire-release-date: \\nurl-filtering-version: 0000.00.00.000\\nglobal-protect-datafile-version: unknown\\nglobal-protect-datafile-release-date: unknown\\nglobal-protect-clientless-vpn-version: 0\\nglobal-protect-clientless-vpn-release-date: \\nlogdb-version: 8.1.8\\nplatform-family: vm\\nvpn-disable-mode: off\\nmulti-vsys: off\\noperational-mode: normal\\n\\nadmin@pa-60.99> \\n===== end exec cmd: [show system info] 2025-10-31 10:59:22.108917 =====\\n"
-}`;
 ---
 
 <MainLayout
-  title="NetDriver Tutorials - OpenSecFlow"
-  description="Learn network automation, security best practices, and development tutorials from OpenSecFlow."
-  keywords={['netdriver', 'tutorial', 'network automation', 'rest api', 'ssh', 'netdevops']}
+  title="NetDriver Agent 5-Minute Quickstart - OpenSecFlow"
+  description="Launch NetDriver with Docker and complete your first network device configuration in 5 minutes via HTTP API! No need to write SSH connection code, no need to handle complex exceptions - everything is as simple as calling a REST API."
+  keywords={['netdriver', 'tutorial', 'network automation', 'rest api', 'ssh', 'netdevops', 'quickstart', 'docker']}
 >
   <BreadcrumbList items={breadcrumbItems} siteURL={siteURL} />
   <SchemaLD schema={howToSchema} />
@@ -301,462 +156,19 @@ const textfsmResponseCode = `{
 
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-    <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-navy-800 mb-4">
-        NetDriver Tutorials
-      </h1>
-      <p class="text-lg text-slate-blue-600 max-w-2xl mx-auto">
-        Step-by-step guides and tutorials for network automation, security practices, and development workflows
-      </p>
-    </div>
-
-    <!-- Section 1: YouTube Video Placeholder -->
-    <section class="mb-16">
-      <div class="bg-white rounded-xl shadow-lg border-2 border-slate-blue-200 overflow-hidden">
-        <div class="aspect-video bg-slate-blue-100 flex items-center justify-center">
-          <div class="text-center">
-            <svg class="w-20 h-20 mx-auto text-sky-500 mb-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23.499 6.203a2.897 2.897 0 0 0-2.037-2.04C19.034 3.5 12 3.5 12 3.5s-7.033 0-9.462.663A2.898 2.898 0 0 0 .5 6.203 30.898 30.898 0 0 0 0 12a30.897 30.897 0 0 0 .499 5.797c.283 1.02 1.071 1.808 2.039 2.041C4.967 20.5 12 20.5 12 20.5s7.034 0 9.462-.663a2.897 2.897 0 0 0 2.037-2.04A30.897 30.897 0 0 0 24 12a30.897 30.897 0 0 0-.501-5.797zM9.75 16.02V7.98l6.5 4.02-6.5 4.02z"/>
-            </svg>
-            <p class="text-slate-blue-600 font-medium">YouTube Video Placeholder</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 2: NetDriver Agent Quick Start Guide -->
-    <section>
-      <article class="bg-white rounded-xl shadow-lg border-2 border-slate-blue-200 p-8 md:p-12">
-        <h2 class="text-3xl font-bold text-navy-800 mb-6" id="netdriver-agent-quick-start-guide">
-          NetDriver Agent Quick Start Guide
-        </h2>
-        <p class="text-lg text-slate-blue-600 mb-8">
-          This guide will help you quickly get started with NetDriver Agent service.
-        </p>
-
-        <div class="prose prose-slate prose-lg max-w-none prose-headings:text-navy-800 prose-headings:font-semibold prose-h3:text-2xl prose-h4:text-xl prose-p:text-slate-blue-700 prose-strong:text-navy-800 prose-code:text-sky-600 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-sky-500 prose-blockquote:bg-sky-50 prose-blockquote:text-slate-blue-700 prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline">
-          
-          <!-- Table of Contents -->
-          <nav class="mb-12 p-6 bg-slate-blue-50 rounded-lg border-l-4 border-sky-500">
-            <h3 class="text-xl font-semibold text-navy-800 mb-4 mt-0">Table of Contents</h3>
-            <ul class="toc-list space-y-2">
-              <li><a href="#introduction" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-icon">📖</span> Introduction</a></li>
-              <li>
-                <a href="#installation" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-icon">⚙️</span> Installation</a>
-                <ul class="toc-sublist ml-6 mt-2 space-y-1">
-                  <li><a href="#prepare" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-subicon">📋</span> Prepare</a></li>
-                  <li><a href="#configuration" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-subicon">⚙️</span> Configuration</a></li>
-                  <li><a href="#option-1-install-via-pypi" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-subicon">📦</span> Option 1: Install via PyPI</a></li>
-                  <li><a href="#option-2-install-via-docker" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-subicon">🐳</span> Option 2: Install via Docker</a></li>
-                </ul>
-              </li>
-              <li><a href="#using-the-rest-api" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-icon">🔌</span> Using the REST API</a></li>
-              <li><a href="#next-steps" class="text-sky-600 hover:text-sky-700 hover:underline flex items-center gap-2"><span class="toc-icon">🚀</span> Next Steps</a></li>
-            </ul>
-          </nav>
-
-          <!-- Introduction -->
-          <section id="introduction" class="mb-12">
-            <h3 class="text-2xl font-semibold text-navy-800 mb-4">Introduction</h3>
-            <p class="text-slate-blue-700 mb-4">
-              NetDriver Agent is a FastAPI-based REST API service that provides:
-            </p>
-            <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-2">
-              <li><strong>Device Connectivity Testing</strong>: Verify SSH connectivity to network devices</li>
-              <li><strong>Command Execution</strong>: Execute CLI commands on network devices via HTTP API</li>
-              <li><strong>Session Management</strong>: Maintain persistent SSH sessions with customizable timeouts</li>
-              <li><strong>Command Queue</strong>: Ensure sequential command execution to prevent configuration conflicts</li>
-            </ul>
-
-            <h4 class="text-xl font-semibold text-navy-800 mb-3 mt-6">Key Features</h4>
-            <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-2">
-              <li><strong>HTTP RESTful API</strong>: Easy integration with third-party platforms and automation tools</li>
-              <li><strong>Session Persistence</strong>: Reuse SSH connections for improved efficiency and reduced latency</li>
-              <li><strong>Command Queue</strong>: Sequential command execution prevents configuration conflicts</li>
-              <li><strong>Flexible Configuration</strong>: Customize timeouts and behavior per device, vendor, or globally</li>
-              <li><strong>High Performance</strong>: AsyncSSH-based architecture for handling multiple concurrent requests</li>
-            </ul>
-          </section>
-
-          <!-- Installation -->
-          <section id="installation" class="mb-12">
-            <h3 class="text-2xl font-semibold text-navy-800 mb-4">Installation</h3>
-
-            <!-- Prepare -->
-            <section id="prepare" class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Prepare</h4>
-              <p class="text-slate-blue-700 mb-4">
-                Create and enter a directory for running the agent. Then:
-              </p>
-              <p class="text-slate-blue-700 mb-2 font-semibold">1. Create Configuration Directory</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">mkdir -p config/agent logs</code></pre>
-              <p class="text-slate-blue-700 mb-2 font-semibold">2. Download Default Configuration File</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">curl -o config/agent/agent.yml https://raw.githubusercontent.com/OpenSecFlow/netdriver/master/config/agent/agent.yml</code></pre>
-            </section>
-
-            <!-- Configuration -->
-            <section id="configuration" class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Configuration</h4>
-              <p class="text-slate-blue-700 mb-4">
-                The Agent configuration file is located at <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">config/agent/agent.yml</code>:
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-yaml">api:
-  # HTTP request log level
-  # - INFO: only output request method and path
-  # - DEBUG: output detailed request body
-  request_log_level: DEBUG
-
-logging:
-  # Log level: INFO / DEBUG / TRACE
-  level: INFO
-  # Agent log file path
-  log_file: logs/agent.log
-
-session:
-  # Session pool check interval (seconds)
-  check_interval: 30
-  # Read buffer size (bytes), default 1MB
-  read_buffer_size: 1048576
-
-  ssh:
-    login_timeout: 20        # Login timeout (seconds)
-    connect_timeout: 30      # Connection timeout (seconds)
-    keepalive_interval: 60   # Keepalive interval (seconds)
-    keepalive_count_max: 3   # Max keepalive retry count
-
-  profiles:
-    # Global profile, used when no other profile matches
-    global:
-      read_timeout: 10.0          # Read timeout (seconds)
-      expiration_time: "16:00"    # Session expiration time (HH:MM)
-      max_idle_time: 600.0        # Max idle time (seconds)
-
-    # Vendor/model/version based profile (higher priority than global)
-    vendor:
-      cisco:
-        nexus:
-          base:
-            read_timeout: 60.0
-            expiration_time: "16:00"
-            max_idle_time: 600.0
-
-    # IP address based profile (highest priority)
-    # ip:
-    #   192.168.1.1:
-    #     read_timeout: 15.0
-    #     expiration_time: "16:00"
-    #     max_idle_time: 600.0</code></pre>
-              
-              <blockquote class="border-l-4 border-sky-500 bg-sky-50 pl-4 py-2 my-4 italic text-slate-blue-700">
-                The downloaded sample configuration includes sensible defaults for most use cases. You can customize the settings based on your specific requirements.
-              </blockquote>
-
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-6">Configuration Explanation</h5>
-              <ol class="list-decimal pl-6 mb-4 text-slate-blue-700 space-y-3">
-                <li><strong>API Settings</strong>:
-                  <ul class="list-disc pl-6 mt-1">
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">request_log_level</code>: Controls HTTP request logging verbosity (INFO or DEBUG)</li>
-                  </ul>
-                </li>
-                <li><strong>Session Timeout Settings</strong>:
-                  <ul class="list-disc pl-6 mt-1">
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">read_timeout</code>: Read timeout during command execution</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">expiration_time</code>: Daily session expiration time; all sessions are closed at this time</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">max_idle_time</code>: Maximum idle time before automatically closing the session</li>
-                  </ul>
-                </li>
-                <li><strong>SSH Connection Settings</strong>:
-                  <ul class="list-disc pl-6 mt-1">
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">login_timeout</code>: Maximum time to wait for login completion</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">connect_timeout</code>: Maximum time to wait for SSH connection</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">keepalive_interval</code>: Interval between keepalive packets</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">keepalive_count_max</code>: Maximum number of keepalive retries</li>
-                  </ul>
-                </li>
-                <li><strong>Configuration Priority</strong>: IP config &gt; Vendor config &gt; Global config</li>
-                <li><strong>Logging Configuration</strong>:
-                  <ul class="list-disc pl-6 mt-1">
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">level</code>: Log level (INFO, DEBUG, TRACE)</li>
-                    <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">log_file</code>: Path to log file</li>
-                  </ul>
-                </li>
-              </ol>
-
-              <p class="text-slate-blue-700 mb-4 font-semibold">Important Notes:</p>
-              <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-2">
-                <li>Configuration profiles allow device-specific settings</li>
-                <li>IP-based profiles have the highest priority</li>
-                <li>Vendor/model/version profiles override global settings</li>
-                <li>Global profile is used when no specific profile matches</li>
-              </ul>
-
-              <p class="text-slate-blue-700 mb-4">
-                Choose one of the following installation methods:
-              </p>
-            </section>
-
-            <!-- Option 1: Install via PyPI -->
-            <section id="option-1-install-via-pypi" class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Option 1: Install via PyPI</h4>
-              
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">Prerequisites</h5>
-              <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-1">
-                <li>Python 3.12 or higher</li>
-                <li>pip (Python package installer)</li>
-              </ul>
-
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">Installation Steps</h5>
-              <p class="text-slate-blue-700 mb-2 font-semibold">1. Install NetDriver Agent Package</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">pip install netdriver-agent</code></pre>
-              <p class="text-slate-blue-700 mb-2 font-semibold">2. Verify Installation</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">python -c "import netdriver.agent; print('NetDriver Agent installed successfully')"</code></pre>
-
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">Run</h5>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">uvicorn netdriver.agent.main:app --host 0.0.0.0 --port 8000</code></pre>
-            </section>
-
-            <!-- Option 2: Install via Docker -->
-            <section id="option-2-install-via-docker" class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Option 2: Install via Docker</h4>
-              
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">Prerequisites</h5>
-              <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-1">
-                <li>Docker 20.10 or higher</li>
-                <li>Docker Compose (optional)</li>
-              </ul>
-
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">Using Docker Run</h5>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">docker run -d \
-  --name netdriver-agent \
-  -p 8000:8000 \
-  -v $(pwd)/config:/app/config \
-  -v $(pwd)/logs:/app/logs \
-  ghcr.io/opensecflow/netdriver/netdriver-agent:latest</code></pre>
-
-              <p class="text-slate-blue-700 mb-2 mt-4">validate docker running</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">λ › docker ps                                                                                                                                                                                              ~
-CONTAINER ID   IMAGE                                                  COMMAND                   CREATED         STATUS                   PORTS                                         NAMES
-fb51ab4f1275   ghcr.io/opensecflow/netdriver/netdriver-agent:latest   "uvicorn netdriver.a…"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp   netdriver-agent
-λ ›</code></pre>
-            </section>
-
-            <!-- Check log -->
-            <section class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Check log</h4>
-              <p class="text-slate-blue-700 mb-4">
-                Run <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">tail</code> command to check logs
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash">tail -f logs/agent.log</code></pre>
-              <p class="text-slate-blue-700 mb-4">
-                After successful startup, you'll see output similar to:
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-text">λ › tail -f logs/agent.log                                                                                                                                             docker-instances/netdriver-agent main
-2025-10-31 09:51:12.594 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: array/base -> <class 'netdriver.plugins.array.array.ArrayBase'>
-2025-10-31 09:51:12.595 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: array/ag -> <class 'netdriver.plugins.array.array_ag.ArrayAG'>
-2025-10-31 09:51:12.595 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: chaitin/base -> <class 'netdriver.plugins.chaitin.chaitin.ChaiTinBase'>
-2025-10-31 09:51:12.595 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: chaitin/ctdsg.* -> <class 'netdriver.plugins.chaitin.chaitin_ctdsg.ChaiTinCTDSG'>
-2025-10-31 09:51:12.595 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: venustech/base -> <class 'netdriver.plugins.venustech.venustech.VenustechBase'>
-2025-10-31 09:51:12.596 +00:00 | INFO | - | netdriver.plugin.core:__init__:25 | registed plugin: venustech/usg.* -> <class 'netdriver.plugins.venustech.venustech_usg.VenustechUSG'>
-2025-10-31 09:51:12.596 +00:00 | INFO | - | netdriver.plugin.engine:_load_plugins:45 | Loaded 43 plugins.
-2025-10-31 09:51:12.596 +00:00 | INFO | - | netdriver.client.pool:__new__:28 | Creating SessionManager instance
-2025-10-31 09:51:12.596 +00:00 | INFO | - | uvicorn.lifespan.on:startup:62 | Application startup complete.
-2025-10-31 09:51:12.596 +00:00 | INFO | - | uvicorn.server:_log_started_message:214 | Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-2025-10-31 09:51:17.448 +00:00 | INFO | 3df1be5d06f5456b80f5cb8a0dec5b1f | uvicorn.protocols.http.h11_impl:send:473 | 127.0.0.1:46318 - "GET /health HTTP/1.1" 200</code></pre>
-            </section>
-          </section>
-
-          <!-- Using the REST API -->
-          <section id="using-the-rest-api" class="mb-12">
-            <h3 class="text-2xl font-semibold text-navy-800 mb-4">Using the REST API</h3>
-            <p class="text-slate-blue-700 mb-4">
-              The Agent provides an OpenAPI (Swagger) documentation interface for easy API testing and learning:
-            </p>
-            <p class="text-slate-blue-700 mb-4">
-              Visit <a href="http://localhost:8000/docs" class="text-sky-600 hover:text-sky-700 hover:underline" target="_blank" rel="noopener noreferrer">http://localhost:8000/docs</a>
-            </p>
-
-            <!-- Test Connection -->
-            <section class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Test Connection</h4>
-              <p class="text-slate-blue-700 mb-4">
-                You can test connectivity to a real network device or the device simulated by SimNet.
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash" set:html={connectRequestCode}></code></pre>
-
-              <blockquote class="border-l-4 border-sky-500 bg-sky-50 pl-4 py-2 my-4 text-slate-blue-700">
-                <p class="font-semibold mb-2">API Parameters Explained:</p>
-                <ul class="list-disc pl-6 space-y-1">
-                  <li><strong>API Endpoint</strong>: <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">http://localhost:8000/api/v1/connect</code></li>
-                  <li><strong>protocol</strong>: Currently only supports SSH; Telnet support is planned for future releases.</li>
-                  <li><strong>ip, port, username, password</strong>: Standard connection parameters for network devices.</li>
-                  <li><strong>enable_password</strong>: Required only for devices that prompt for an enable password when switching from login mode to privileged mode (e.g., Cisco ASA, IOS, and Array AG). Leave empty for other devices.</li>
-                  <li><strong>vendor, model, version</strong>: Specifies which plugin to load for the session. Refer to the OpenAPI documentation for supported values.</li>
-                  <li><strong>encode</strong>: Specifies the device's character encoding. NetDriver Agent automatically converts input and output between the device encoding and UTF-8.</li>
-                  <li><strong>vsys</strong>: Set to "default" if the device doesn't support virtual systems. If specified, NetDriver Agent will automatically switch to the designated virtual system before executing commands.</li>
-                  <li><strong>timeout</strong>: Request timeout in seconds.</li>
-                </ul>
-              </blockquote>
-
-              <p class="text-slate-blue-700 mb-2">Got response</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-json" set:html={connectResponseCode}></code></pre>
-
-              <blockquote class="border-l-4 border-sky-500 bg-sky-50 pl-4 py-2 my-4 text-slate-blue-700">
-                <p class="font-semibold mb-2">API Response Explained</p>
-                <ul class="list-disc pl-6 space-y-1">
-                  <li><strong>code</strong>: "OK" or error code</li>
-                  <li><strong>msg</strong>: detail message of response</li>
-                </ul>
-              </blockquote>
-            </section>
-
-            <!-- Execute Commands -->
-            <section class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Execute Commands</h4>
-              <p class="text-slate-blue-700 mb-4">
-                Execute CLI commands on network devices:
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash" set:html={cmdRequestCode}></code></pre>
-
-              <blockquote class="border-l-4 border-sky-500 bg-sky-50 pl-4 py-2 my-4 text-slate-blue-700">
-                <p class="font-semibold mb-2">API Parameters Explained:</p>
-                <ul class="list-disc pl-6 space-y-1">
-                  <li><strong>continue_on_error</strong>: If <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">true</code>, all commands will be executed ignoring errors; if <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">false</code>, execution will stop when an error occurs.</li>
-                  <li><strong>commands</strong>: Supports executing multiple commands in one request
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                      <li><strong>type</strong>: <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">raw</code> returns the raw output; <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">textfsm</code> parses the output using a TextFSM template</li>
-                      <li><strong>mode</strong>: Options are <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">login</code>, <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">enable</code>, or <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">config</code>. The agent will automatically detect the current mode and switch to the specified mode.</li>
-                      <li><strong>command</strong>: The command to execute on the device. Supports multiple lines using <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">\n</code>.</li>
-                      <li><strong>template</strong>: The template for parsing output; leave empty when using type <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">raw</code>.</li>
-                      <li><strong>detail_output</strong>: If <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">true</code>, records output during mode or vsys switching; if <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">false</code>, records output only for command execution.</li>
-                    </ul>
-                  </li>
-                </ul>
-              </blockquote>
-
-              <p class="text-slate-blue-700 mb-2">got response</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-json" set:html={cmdResponseCode}></code></pre>
-
-              <blockquote class="border-l-4 border-sky-500 bg-sky-50 pl-4 py-2 my-4 text-slate-blue-700">
-                <p class="font-semibold mb-2">API Response Explained</p>
-                <ul class="list-disc pl-6 space-y-1">
-                  <li><strong>time</strong>: Time consumed in seconds for the request.</li>
-                  <li><strong>result</strong>: Result item for each command.
-                    <ul class="list-disc pl-6 mt-1 space-y-1">
-                      <li><strong>ret_code</strong>: "OK" or error code for each command execution.</li>
-                      <li><strong>command</strong>: The command that was executed.</li>
-                      <li><strong>ret</strong>: The raw CLI output or TextFSM parsed objects.</li>
-                    </ul>
-                  </li>
-                  <li><strong>output</strong>: The CLI output of the request, including the output of all commands.</li>
-                </ul>
-              </blockquote>
-
-              <p class="text-slate-blue-700 mb-2">Check output in pretty way</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-text">admin@pa-60.99> show system info
-
-hostname: pa-60.99
-ip-address: 192.168.60.99
-public-ip-address: unknown
-netmask: 255.255.255.0
-default-gateway: 192.168.60.1
-ip-assignment: static
-ipv6-address: unknown
-ipv6-link-local-address: fe80::524d:13ff:fe00:600/64
-ipv6-default-gateway:
-mac-address: 50:4d:13:00:06:00
-time: Fri Oct 31 18:23:30 2025
-uptime: 0 days, 0:28:45
-family: vm
-model: PA-VM
-serial: unknown
-vm-mac-base: BA:DB:EE:FB:AD:00
-vm-mac-count: 255
-vm-uuid: 6A28E9C6-1288-4A90-89E1-FC1766012B98
-vm-cpuid: KVM:63060000FDFB8B07
-vm-license: none
-vm-mode: KVM
-cloud-mode: non-cloud
-sw-version: 8.1.0
-global-protect-client-package-version: 0.0.0
-app-version: 769-4439
-app-release-date:
-av-version: 0
-av-release-date:
-threat-version: 0
-threat-release-date:
-wf-private-version: 0
-wf-private-release-date: unknown
-url-db: paloaltonetworks
-wildfire-version: 0
-wildfire-release-date:
-url-filtering-version: 0000.00.00.000
-global-protect-datafile-version: unknown
-global-protect-datafile-release-date: unknown
-global-protect-clientless-vpn-version: 0
-global-protect-clientless-vpn-release-date:
-logdb-version: 8.1.8
-platform-family: vm
-vpn-disable-mode: off
-multi-vsys: off
-operational-mode: normal
-
-admin@pa-60.99>
-===== end exec cmd: [show system info] 2025-10-31 10:23:30.633140 =====</code></pre>
-            </section>
-
-            <!-- Execute Commands with TextFSM parsing -->
-            <section class="mb-8">
-              <h4 class="text-xl font-semibold text-navy-800 mb-3">Execute Commands with TextFSM parsing</h4>
-              <p class="text-slate-blue-700 mb-4">
-                Let's use <a href="https://github.com/google/textfsm" class="text-sky-600 hover:text-sky-700 hover:underline" target="_blank" rel="noopener noreferrer">TextFSM</a> to retrive structed data from raw output.
-              </p>
-
-              <h5 class="text-lg font-semibold text-navy-800 mb-3 mt-4">TextFSM Template</h5>
-              <p class="text-slate-blue-700 mb-4">
-                Folloing template is going to retrive hostname, ip, model, version from outpuot.
-              </p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-textfsm" set:html={textfsmTemplateCode}></code></pre>
-
-              <p class="text-slate-blue-700 mb-2">Request</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-bash" set:html={textfsmRequestCode}></code></pre>
-
-              <p class="text-slate-blue-700 mb-2">Got response</p>
-              <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto mb-4"><code class="language-json" set:html={textfsmResponseCode}></code></pre>
-
-              <p class="text-slate-blue-700 mb-4">
-                Check <code class="bg-slate-100 px-2 py-1 rounded text-sky-600">ret</code>, it got a object list parsed by Textfsm.
-              </p>
-            </section>
-          </section>
-
-          <!-- Summary -->
-          <section id="next-steps" class="mb-12">
-            <h3 class="text-2xl font-semibold text-navy-800 mb-4">Summary</h3>
-            <p class="text-slate-blue-700 mb-4 font-semibold">What You've Accomplished:</p>
-            <ul class="list-disc pl-6 mb-6 text-slate-blue-700 space-y-2">
-              <li>✅ Installed and configured NetDriver Agent</li>
-              <li>✅ Started the Agent service (via PyPI or Docker)</li>
-              <li>✅ Connected to network devices via REST API</li>
-              <li>✅ Executed commands and retrieved structured data</li>
-            </ul>
-
-            <p class="text-slate-blue-700 mb-4 font-semibold">API Capabilities:</p>
-            <ul class="list-disc pl-6 mb-4 text-slate-blue-700 space-y-2">
-              <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">POST /api/v1/connect</code> - Test device connectivity</li>
-              <li><code class="bg-slate-100 px-2 py-1 rounded text-sky-600">POST /api/v1/cmd</code> - Execute commands with raw or TextFSM output</li>
-              <li>Automatic mode switching (login/enable/config)</li>
-              <li>Virtual system (vsys) support for multi-context devices</li>
-              <li>Comprehensive error handling and timeout management</li>
-            </ul>
-          </section>
-        </div>
-      </article>
-    </section>
+    <article class="bg-white rounded-xl shadow-lg border-2 border-slate-blue-200 p-8 md:p-12">
+      <div class="prose prose-slate prose-lg max-w-none prose-headings:text-navy-800 prose-headings:font-semibold prose-h3:text-2xl prose-h4:text-xl prose-p:text-slate-blue-700 prose-strong:text-navy-800 prose-code:text-sky-600 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-sky-500 prose-blockquote:bg-sky-50 prose-blockquote:text-slate-blue-700 prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline" set:html={htmlContent} />
+    </article>
   </div>
 </MainLayout>
 
 <style>
   @keyframes float1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-30px) translateX(20px); }
+  }
+  
+  @keyframes float2 {
     0%, 100% { transform: translateY(0px) translateX(0px); }
     50% { transform: translateY(-30px) translateX(20px); }
   }
@@ -845,6 +257,11 @@ admin@pa-60.99>
   import 'prismjs/components/prism-yaml';
   
   function highlightCode() {
+    // Handle TextFSM code blocks (treat as text if no language support)
+    document.querySelectorAll('pre code[class*="language-textfsm"], pre code[class*="language-TextFSM"]').forEach((el) => {
+      el.className = 'language-text';
+    });
+    
     Prism.highlightAll();
   }
   

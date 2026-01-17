@@ -10,6 +10,7 @@ export const BlogPosts = defineTable({
     heroImage: column.text({ optional: true }),
     tags: column.json({ optional: true }),
     body: column.text(),
+    externalLink: column.text({ optional: true }),
   },
 });
 

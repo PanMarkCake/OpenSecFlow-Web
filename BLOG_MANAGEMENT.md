@@ -30,6 +30,7 @@ This method is best if you prefer writing articles in markdown files.
    updatedDate: 2024-01-26  # Optional
    heroImage: /path/to/image.jpg  # Optional
    tags: ['tutorial', 'astro']
+   externalLink: https://example.com/original-article  # Optional - link to original article
    ---
    
    # My New Article
@@ -46,7 +47,8 @@ This method is best if you prefer writing articles in markdown files.
    - Read all `.md` files from `src/content/blog/`
    - Parse frontmatter and content
    - Insert new articles into the database
-   - Skip articles that already exist (based on slug)
+   - Update existing articles if they already exist (based on slug)
+   - Automatically set `updatedDate` to current date when updating existing articles
 
 #### Advantages:
 - ✅ Familiar markdown workflow
@@ -107,22 +109,26 @@ Each article in the database has the following fields:
 | `heroImage` | text | ❌ No | Path to hero image (optional) |
 | `tags` | json | ❌ No | Array of tags (optional) |
 | `body` | text | ✅ Yes | Markdown content |
+| `externalLink` | text | ❌ No | URL to original/external article (optional) |
 
 ---
 
 ## Updating Existing Articles
 
-### Option 1: Update Markdown File + Re-seed
+### Option 1: Update Markdown File + Re-seed (Recommended)
 
 1. Edit the markdown file in `src/content/blog/`
-2. Update the `updatedDate` in frontmatter
-3. Run seed script (it will skip due to existing slug)
+2. (Optional) Update the `updatedDate` in frontmatter - if not provided, the seed script will automatically set it to the current date
+3. Run the seed script:
+   ```bash
+   npx astro db execute scripts/seed.ts
+   ```
 
-**Note**: The current seed script skips existing articles. To update, you'll need to either:
-- Delete the article from DB first, OR
-- Modify the seed script to use `INSERT OR REPLACE`
+The seed script will automatically detect that the article already exists and update it with the new content from your markdown file.
 
-### Option 2: Create an Update Script
+**Note**: The seed script now automatically updates existing articles instead of skipping them. All fields (title, description, body, tags, etc.) will be updated from the markdown file.
+
+### Option 2: Create an Update Script (For Programmatic Updates)
 
 Create `db/update-article.ts`:
 ```typescript
@@ -190,6 +196,11 @@ Astro DB uses SQLite by default. The database file is located at:
    - ✅ Good: `/images/hero.jpg`
    - ❌ Bad: `../images/hero.jpg`
 
+6. **External Links**: If your article is a summary or repost of an external article, include the original URL
+   - ✅ Good: `externalLink: https://medium.com/@author/article`
+   - ✅ Good: `externalLink: https://example.com/original-post`
+   - The external link will be displayed as a button on both the blog listing and individual post pages
+
 ---
 
 ## Troubleshooting
@@ -216,7 +227,7 @@ Astro DB uses SQLite by default. The database file is located at:
 Here's a complete example of adding a new article:
 
 1. **Create markdown file**: `src/content/blog/my-tutorial.md`
-2. **Add content**:
+2. **Add frontmatter and content**:
    ```markdown
    ---
    title: My Tutorial
@@ -229,7 +240,37 @@ Here's a complete example of adding a new article:
    
    Content here...
    ```
-3. **Run seed**: `npx astro db execute db/seed.ts`
+3. **Run seed script** to sync to database:
+   ```bash
+   npx astro db execute scripts/seed.ts
+   ```
+   You should see output like:
+   ```
+   Found 13 blog post(s) to sync...
+   ✓ Added: my-tutorial
+   Sync complete!
+   ```
 4. **Verify**: Visit `http://localhost:4321/blog/my-tutorial`
 
 That's it! Your article is now in the database and visible on your site.
+
+## Updating an Existing Article
+
+To update an article you've already added:
+
+1. **Edit the markdown file** in `src/content/blog/`
+2. **Make your changes** to the content
+3. **Optionally update `updatedDate`** in frontmatter (if omitted, it will be set automatically)
+4. **Run the seed script again**:
+   ```bash
+   npx astro db execute scripts/seed.ts
+   ```
+   You should see:
+   ```
+   Found 13 blog post(s) to sync...
+   ✓ Updated: my-tutorial
+   Sync complete!
+   ```
+5. **Refresh your browser** to see the changes
+
+The seed script automatically detects existing articles and updates them with the latest content from your markdown files.

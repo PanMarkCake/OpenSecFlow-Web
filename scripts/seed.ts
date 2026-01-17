@@ -1,4 +1,5 @@
 import { db, BlogPosts } from 'astro:db';
+import { eq } from 'astro:db';
 import matter from 'gray-matter';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -19,7 +20,7 @@ export default async function seed() {
     return;
   }
 
-  console.log(`Found ${files.length} blog post(s) to migrate...`);
+  console.log(`Found ${files.length} blog post(s) to sync...`);
 
   for (const file of files) {
     const filePath = join(blogDir, file);
@@ -39,16 +40,38 @@ export default async function seed() {
       heroImage: data.heroImage || null,
       tags: data.tags || [],
       body: content.trim(),
+      externalLink: data.externalLink || null,
     };
 
     try {
-      // Insert into database (will fail if slug already exists due to primary key constraint)
-      await db.insert(BlogPosts).values(postData);
-      console.log(`✓ Migrated: ${slug}`);
+      // Check if article already exists
+      const existing = await db.select().from(BlogPosts).where(eq(BlogPosts.slug, slug)).limit(1);
+      
+      if (existing.length > 0) {
+        // Update existing article
+        await db
+          .update(BlogPosts)
+          .set({
+            title: postData.title,
+            description: postData.description,
+            pubDate: postData.pubDate,
+            updatedDate: postData.updatedDate || new Date(), // Set updatedDate if not provided
+            heroImage: postData.heroImage,
+            tags: postData.tags,
+            body: postData.body,
+            externalLink: postData.externalLink,
+          })
+          .where(eq(BlogPosts.slug, slug));
+        console.log(`✓ Updated: ${slug}`);
+      } else {
+        // Insert new article
+        await db.insert(BlogPosts).values(postData);
+        console.log(`✓ Added: ${slug}`);
+      }
     } catch (error) {
-      console.warn(`⚠ Skipped ${slug} (may already exist):`, error instanceof Error ? error.message : error);
+      console.error(`✗ Error processing ${slug}:`, error instanceof Error ? error.message : error);
     }
   }
 
-  console.log('Migration complete!');
+  console.log('Sync complete!');
 }

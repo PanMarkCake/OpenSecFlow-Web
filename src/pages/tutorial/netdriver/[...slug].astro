@@ -1,0 +1,172 @@
+---
+import { getCollection } from 'astro:content';
+import MainLayout from '../../../layouts/MainLayout.astro';
+import SchemaLD from '../../../components/SchemaLD.astro';
+import BreadcrumbList from '../../../components/schemas/BreadcrumbList.astro';
+import { marked } from 'marked';
+import { extractTitle, extractSummary } from '../../../utils/tutorialParser';
+import 'prismjs/themes/prism-tomorrow.css';
+
+export async function getStaticPaths() {
+  const tutorials = await getCollection('tutorials', ({ data, id }) => {
+    return id.startsWith('netdriver/');
+  });
+  
+  return tutorials.map((tutorial) => {
+    const slug = tutorial.id.replace('netdriver/', '');
+    return {
+      params: { slug },
+      props: { tutorial },
+    };
+  });
+}
+
+const { tutorial } = Astro.props;
+const htmlContent = marked.parse(tutorial.body);
+const title = extractTitle(tutorial.body);
+const summary = extractSummary(tutorial.body);
+
+const siteURL = Astro.site || 'https://opensecflow.io';
+const tutorialURL = new URL(`/tutorial/netdriver/${tutorial.id.replace('netdriver/', '')}`, siteURL).toString();
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { name: 'Home', url: '/' },
+  { name: 'Tutorial', url: '/tutorial' },
+  { name: 'NetDriver', url: '/tutorial/netdriver' },
+  { name: title, url: tutorialURL },
+];
+
+// HowTo Schema for the tutorial
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: title,
+  description: summary,
+  image: new URL('/osfLogoFull.svg', siteURL).toString(),
+  estimatedCost: {
+    '@type': 'MonetaryAmount',
+    currency: 'USD',
+    value: '0',
+  },
+  url: tutorialURL,
+};
+
+---
+
+<MainLayout
+  title={`${title} - OpenSecFlow`}
+  description={summary}
+  keywords={['netdriver', 'tutorial', 'network automation', 'rest api', 'ssh', 'netdevops']}
+>
+  <BreadcrumbList items={breadcrumbItems} siteURL={siteURL} />
+  <SchemaLD schema={howToSchema} />
+  <!-- Animated Background -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-blue-50 via-white to-sky-50"></div>
+    <!-- Animated SVG shapes -->
+    <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="tutorialGrad1" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgb(92,178,214)" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="rgb(81,118,151)" stop-opacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="tutorialGrad2" gradientUnits="userSpaceOnUse" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgb(18,57,104)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="rgb(65,97,133)" stop-opacity="0.15"/>
+        </linearGradient>
+        <linearGradient id="tutorialGrad3" gradientUnits="userSpaceOnUse" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="rgb(72,104,141)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="rgb(90,171,206)" stop-opacity="0.1"/>
+        </linearGradient>
+      </defs>
+      <!-- Floating shapes -->
+      <path class="tutorial-shape-1" d="M 0 200 Q 360 150 720 200 T 1440 200 L 1440 0 L 0 0 Z" fill="url(#tutorialGrad1)"/>
+      <path class="tutorial-shape-2" d="M 0 700 Q 480 650 960 700 T 1920 700 L 1920 900 L 0 900 Z" fill="url(#tutorialGrad2)"/>
+      <circle class="tutorial-shape-3" cx="1200" cy="300" r="200" fill="url(#tutorialGrad3)"/>
+      <circle class="tutorial-shape-4" cx="200" cy="600" r="150" fill="url(#tutorialGrad1)"/>
+      <path class="tutorial-shape-5" d="M 800 0 Q 900 100 1000 0 L 1000 200 Q 900 100 800 200 Z" fill="url(#tutorialGrad2)"/>
+    </svg>
+    <!-- Additional gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-blue-50/50"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <article class="bg-white rounded-xl shadow-lg border-2 border-slate-blue-200 p-8 md:p-12">
+      <div class="prose prose-slate prose-lg max-w-none prose-headings:text-navy-800 prose-headings:font-semibold prose-h3:text-2xl prose-h4:text-xl prose-p:text-slate-blue-700 prose-strong:text-navy-800 prose-code:text-sky-600 prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-blockquote:border-sky-500 prose-blockquote:bg-sky-50 prose-blockquote:text-slate-blue-700 prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline" set:html={htmlContent} />
+    </article>
+  </div>
+</MainLayout>
+
+<style>
+  @keyframes float1 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(-30px) translateX(20px); }
+  }
+  
+  @keyframes float2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    50% { transform: translateY(20px) translateX(-15px); }
+  }
+  
+  @keyframes float3 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-25px) scale(1.1); }
+  }
+  
+  @keyframes float4 {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(15px) scale(0.9); }
+  }
+  
+  @keyframes float5 {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50% { transform: translateX(30px) rotate(5deg); }
+  }
+
+  .tutorial-shape-1 {
+    animation: float1 20s ease-in-out infinite;
+  }
+  
+  .tutorial-shape-2 {
+    animation: float2 25s ease-in-out infinite;
+  }
+  
+  .tutorial-shape-3 {
+    animation: float3 18s ease-in-out infinite;
+  }
+  
+  .tutorial-shape-4 {
+    animation: float4 22s ease-in-out infinite;
+  }
+  
+  .tutorial-shape-5 {
+    animation: float5 15s ease-in-out infinite;
+  }
+</style>
+
+<script>
+  import Prism from 'prismjs';
+  import 'prismjs/components/prism-bash';
+  import 'prismjs/components/prism-json';
+  import 'prismjs/components/prism-yaml';
+  
+  function highlightCode() {
+    // Handle TextFSM code blocks (treat as text if no language support)
+    document.querySelectorAll('pre code[class*="language-textfsm"], pre code[class*="language-TextFSM"]').forEach((el) => {
+      el.className = 'language-text';
+    });
+    
+    Prism.highlightAll();
+  }
+  
+  // Highlight on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', highlightCode);
+  } else {
+    highlightCode();
+  }
+  
+  // Highlight after Astro view transitions
+  document.addEventListener('astro:page-load', highlightCode);
+</script>

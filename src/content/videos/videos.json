@@ -1,28 +1,12 @@
 {
   "videos": [
     {
-      "id": "intro-to-opensecflow",
-      "title": "Introduction to OpenSecFlow",
-      "description": "Learn about OpenSecFlow and its core features for building secure web applications.",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "platform": "youtube",
-      "publishedDate": "2024-01-15"
-    },
-    {
-      "id": "astro-seo-best-practices",
-      "title": "SEO Best Practices with Astro",
-      "description": "Discover how to optimize your Astro website for search engines and improve your Core Web Vitals scores.",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "platform": "youtube",
-      "publishedDate": "2024-01-20"
-    },
-    {
-      "id": "tailwind-css-tips",
-      "title": "Tailwind CSS Tips and Tricks",
-      "description": "Master Tailwind CSS with these advanced tips and tricks for building modern, responsive designs.",
-      "url": "https://vimeo.com/123456789",
-      "platform": "vimeo",
-      "publishedDate": "2024-01-25"
+      "id": "NetDriver-Quick-5-Minute-Setup-Tutorial",
+      "title": "NetDriver Quick 5 Minute Setup Tutorial",
+      "description": "NetDriver is an advanced open-source framework for automating network devices. Its main purpose is to use a high-level HTTP RESTful interface to make it easier to execute low-level commands on different networking equipment.",
+      "url": "https://youtu.be/b7ZDJcVmz7Y",
+      "platform": "youtube ",
+      "publishedDate": "2026-01-28"
     }
   ]
 }

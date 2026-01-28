@@ -1,192 +1,199 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
-import Hero from '../components/Hero.astro';
-import FeaturesGrid from '../components/FeaturesGrid.astro';
-import EngineeringChallenges from '../components/EngineeringChallenges.astro';
-import SchemaLD from '../components/SchemaLD.astro';
-import Organization from '../components/schemas/Organization.astro';
-import WebSite from '../components/schemas/WebSite.astro';
+import MainLayout from "../layouts/MainLayout.astro";
+import Hero from "../components/Hero.astro";
+import FeaturesGrid from "../components/FeaturesGrid.astro";
+import EngineeringChallenges from "../components/EngineeringChallenges.astro";
+import SchemaLD from "../components/SchemaLD.astro";
+import Organization from "../components/schemas/Organization.astro";
+import WebSite from "../components/schemas/WebSite.astro";
 
-const siteURL = Astro.site || 'https://opensecflow.io';
+const siteURL = Astro.site || "https://opensecflow.io";
 
 // SoftwareApplication Schema
 const softwareSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'NetDriver',
-  applicationCategory: 'NetworkAutomationApplication',
-  operatingSystem: 'Linux, Cross-platform',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
-  description: 'NetDriver is a free, open-source NetDevOps framework for Python. Built on Netmiko by the OpenSecFlow community for high-performance network automation.',
-  url: siteURL,
-  author: {
-    '@type': 'Organization',
-    name: 'OpenSecFlow',
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "NetDriver",
+    applicationCategory: "NetworkAutomationApplication",
+    operatingSystem: "Linux, Cross-platform",
+    offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+    },
+    description:
+        "NetDriver is a specialized project tailored for NetDevOps engineers. Leveraging NetDriver, developers are empowered to build network automation scripts and applications with greater ease and higher efficiency.",
     url: siteURL,
-  },
-  license: 'https://opensource.org/licenses',
+    author: {
+        "@type": "Organization",
+        name: "OpenSecFlow",
+        url: siteURL,
+    },
+    license: "https://opensource.org/licenses",
 };
 
 // FAQPage Schema
 const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'How does NetDriver solve slow SSH scripting?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'NetDriver maintains persistent SSH connections across multiple command executions, eliminating connection overhead and enabling low-latency command execution.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'How does NetDriver prevent configuration collisions?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'NetDriver\'s intelligent command queuing system prevents configuration collisions by serializing operations and detecting potential conflicts before execution.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'How can I integrate legacy network equipment into web applications?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'NetDriver provides an HTTP RESTful wrapper that transforms legacy CLI interfaces into modern REST APIs, enabling seamless integration with web applications.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'How does NetDriver handle updates at scale?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Built on AsyncSSH, NetDriver enables concurrent operations across hundreds of devices simultaneously, dramatically improving automation throughput.',
-      },
-    },
-  ],
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+        {
+            "@type": "Question",
+            name: "How does NetDriver solve slow SSH scripting?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "NetDriver maintains persistent SSH connections across multiple command executions, eliminating connection overhead and enabling low-latency command execution.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "How does NetDriver prevent configuration collisions?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "NetDriver's intelligent command queuing system prevents configuration collisions by serializing operations and detecting potential conflicts before execution.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "How can I integrate legacy network equipment into web applications?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "NetDriver provides an HTTP RESTful wrapper that transforms legacy CLI interfaces into modern REST APIs, enabling seamless integration with web applications.",
+            },
+        },
+        {
+            "@type": "Question",
+            name: "How does NetDriver handle updates at scale?",
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: "Built on AsyncSSH, NetDriver enables concurrent operations across hundreds of devices simultaneously, dramatically improving automation throughput.",
+            },
+        },
+    ],
 };
 
 const features = [
-  {
-    title: 'API-Driven Integration',
-    description: 'Offers a native HTTP RESTful API for seamless integration with external systems and applications.',
-    icon: '🌐',
-  },
-  {
-    title: 'Customizable Session Persistence',
-    description: 'Maintains open connections for ongoing tasks, significantly improving execution efficiency.',
-    icon: '⚙️',
-  },
-  {
-    title: 'Command Execution Queuing',
-    description: 'Prevents concurrency conflicts to ensure stable and predictable device interactions.',
-    icon: '💻',
-  },
-  {
-    title: 'Asynchronous Operations',
-    description: 'Enables efficient, non-blocking communication with multiple devices simultaneously.',
-    icon: '⚡',
-  },
+    {
+        title: "API-Driven Integration",
+        description:
+            "Offers a native HTTP RESTful API for seamless integration with external systems and applications.",
+        icon: "🌐",
+    },
+    {
+        title: "Customizable Session Persistence",
+        description:
+            "Maintains open connections for ongoing tasks, significantly improving execution efficiency.",
+        icon: "⚙️",
+    },
+    {
+        title: "Command Execution Queuing",
+        description:
+            "Prevents concurrency conflicts to ensure stable and predictable device interactions.",
+        icon: "💻",
+    },
+    {
+        title: "Asynchronous Operations",
+        description:
+            "Enables efficient, non-blocking communication with multiple devices simultaneously.",
+        icon: "⚡",
+    },
 ];
 
 const valueProposition = {
-  title: 'OpenSecFlow',
-  subtitle: 'Network Automation',
+    title: "OpenSecFlow",
+    subtitle: "Network Automation",
 };
 ---
 
 <MainLayout
-  title="OpenSecFlow - Network Automation with Netdriver"
-  description="Netdriver is a free, open-source NetDevOps framework for Python. Built on Netmiko by the OpenSecFlow community for high-performance network automation."
+    title="OpenSecFlow - Network Automation with Netdriver"
+    description="NetDriver is a specialized project tailored for NetDevOps engineers. Leveraging NetDriver, developers are empowered to build network automation scripts and applications with greater ease and higher efficiency."
 >
-  <Organization siteURL={siteURL} />
-  <WebSite siteURL={siteURL} />
-  <SchemaLD schema={softwareSchema} />
-  <SchemaLD schema={faqSchema} />
-  <Hero
-    title={valueProposition.title}
-    subtitle={valueProposition.subtitle}
-    ctaText="Learn More"
-    ctaLink="#features"
-  />
-  
-  <section id="features" class="py-16 bg-gradient-to-b from-white to-slate-blue-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-navy-800 mb-4">
-          What is OpenSecFlow?
-        </h2>
-        <p class="text-xl text-slate-blue-600 font-semibold max-w-3xl mx-auto">
-          OpenSecFlow is an open-source network developer community co-founded by Byntra.se and SkyCloud, dedicated to building an open and secure ecosystem for network and cybersecurity automation.
-          
-        </p>
-      </div>
-    </div>
-    
- 
+    <Organization siteURL={siteURL} />
+    <WebSite siteURL={siteURL} />
+    <SchemaLD schema={softwareSchema} />
+    <SchemaLD schema={faqSchema} />
+    <Hero
+        title={valueProposition.title}
+        subtitle={valueProposition.subtitle}
+        ctaText="Learn More"
+        ctaLink="#features"
+    />
 
-  <FeaturesGrid features={features} />
-
-  <EngineeringChallenges />
-
-  <section class="py-16 bg-gradient-to-br from-navy-700 to-navy-800 text-white relative overflow-hidden">
-    <!-- Decorative Background -->
-    <div class="absolute inset-0 opacity-10">
-      <svg class="w-full h-full" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,160 Q360,80 720,160 T1440,160 L1440,320 L0,320 Z" fill="white" opacity="0.1"/>
-        <path d="M0,224 Q360,288 720,224 T1440,224 L1440,320 L0,320 Z" fill="white" opacity="0.05"/>
-      </svg>
-    </div>
-    
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-bold mb-4">Explore Our Projects</h2>
-      <p class="text-xl text-sky-200 mb-8 max-w-2xl mx-auto">
-        Check out our GitHub repository to explore the codebase and give your feedback so that Netdriver keeps getting better for everyone.
-      </p>
-      <a
-        href="https://github.com/OpenSecFlow/netdriver"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex mr-2 items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-full text-white bg-transparent hover:bg-white hover:text-navy-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-      >
-       Netdriver
-        <svg
-          class="ml-2 -mr-1 w-5 h-5"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </a>
-      <a
-      href="https://github.com/OpenSecFlow/netdriver"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-full text-white bg-transparent hover:bg-white hover:text-navy-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+    <section
+        id="features"
+        class="py-16 bg-gradient-to-b from-white to-slate-blue-50"
     >
-      Netdriver Simunet
-      <svg
-        class="ml-2 -mr-1 w-5 h-5"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </a>
-    </div>
-  </section>
-</MainLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-navy-800 mb-4">
+                    What is OpenSecFlow?
+                </h2>
+                <p
+                    class="text-xl text-slate-blue-600 font-semibold max-w-3xl mx-auto"
+                >
+                    OpenSecFlow is an open-source network developer community
+                    co-founded by <a href="https://byntra.se">Byntra.se</a> and <a
+                        href="https://www.sky-cloud.net">Sky Cloud, Inc.</a
+                    > , dedicated to building an open and secure ecosystem for network
+                    and cybersecurity automation.
+                </p>
+            </div>
+        </div>
 
+        <FeaturesGrid features={features} />
+
+        <EngineeringChallenges />
+
+        <section
+            class="py-16 bg-gradient-to-br from-navy-700 to-navy-800 text-white relative overflow-hidden"
+        >
+            <!-- Decorative Background -->
+            <div class="absolute inset-0 opacity-10">
+                <svg
+                    class="w-full h-full"
+                    viewBox="0 0 1440 320"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M0,160 Q360,80 720,160 T1440,160 L1440,320 L0,320 Z"
+                        fill="white"
+                        opacity="0.1"></path>
+                    <path
+                        d="M0,224 Q360,288 720,224 T1440,224 L1440,320 L0,320 Z"
+                        fill="white"
+                        opacity="0.05"></path>
+                </svg>
+            </div>
+
+            <div
+                class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+            >
+                <h2 class="text-3xl font-bold mb-4">Explore Our Projects</h2>
+                <p class="text-xl text-sky-200 mb-8 max-w-2xl mx-auto">
+                    Check out our GitHub repository to explore the codebase and
+                    give your feedback so that Netdriver keeps getting better
+                    for everyone.
+                </p>
+                <a
+                    href="https://github.com/OpenSecFlow/netdriver"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-full text-white bg-transparent hover:bg-white hover:text-navy-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                    NetDriver
+                    <svg
+                        class="ml-2 -mr-1 w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </a>
+            </div>
+        </section>
+    </section>
+</MainLayout>

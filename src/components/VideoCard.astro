@@ -4,7 +4,7 @@ interface Props {
   description: string;
   url: string;
   thumbnail?: string;
-  platform: 'youtube' | 'vimeo';
+  platform: string;
 }
 
 const { title, description, url, thumbnail, platform } = Astro.props;

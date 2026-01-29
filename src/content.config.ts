@@ -11,8 +11,13 @@ const videos = defineCollection({
         url: z.string().url(),
         thumbnail: z.string().optional(),
         platform: z.preprocess(
-          (val) => (typeof val === 'string' ? val.trim().toLowerCase() : val),
-          z.string()
+          (val) => {
+            if (typeof val === 'string') {
+              return val.trim().toLowerCase();
+            }
+            return val;
+          },
+          z.string().min(1) // Accept any non-empty string
         ),
         duration: z.string().optional(),
         publishedDate: z.coerce.date().optional(),

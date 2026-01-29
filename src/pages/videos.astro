@@ -35,7 +35,8 @@ const videoSchemas = videos.map((video) => {
   };
 
   // Add platform-specific properties
-  if (video.platform === 'youtube') {
+  const normalizedPlatform = video.platform?.trim().toLowerCase() || '';
+  if (normalizedPlatform === 'youtube') {
     videoSchema.regionsAllowed = 'US';
   }
 

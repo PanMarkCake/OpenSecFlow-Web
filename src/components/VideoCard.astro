@@ -10,15 +10,19 @@ interface Props {
 const { title, description, url, thumbnail, platform } = Astro.props;
 
 const getEmbedUrl = (url: string, platform: string) => {
-  if (platform === 'youtube') {
+  // Normalize platform for comparison (trim and lowercase)
+  const normalizedPlatform = platform?.trim().toLowerCase() || '';
+  
+  if (normalizedPlatform === 'youtube') {
     const videoId = url.includes('youtu.be/')
       ? url.split('youtu.be/')[1].split('?')[0]
       : url.split('v=')[1]?.split('&')[0];
     return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
-  } else if (platform === 'vimeo') {
+  } else if (normalizedPlatform === 'vimeo') {
     const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
     return videoId ? `https://player.vimeo.com/video/${videoId}` : url;
   }
+  // For any other platform, return the URL as-is (no embedding transformation)
   return url;
 };
 

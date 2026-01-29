@@ -227,7 +227,7 @@ Examples:
 ### After Your PR is Merged
 
 Once your PR is merged:
-1. The automated workflow will trigger
+1. The automated workflow will trigger, it's pretty much automated.
 2. The site will be built and deployed to Cloudflare Pages
 3. Your changes will be live on the production site
 

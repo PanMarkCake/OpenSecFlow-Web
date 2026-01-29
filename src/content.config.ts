@@ -10,7 +10,10 @@ const videos = defineCollection({
         description: z.string(),
         url: z.string().url(),
         thumbnail: z.string().optional(),
-        platform: z.enum(['youtube', 'vimeo']),
+        platform: z.preprocess(
+          (val) => (typeof val === 'string' ? val.trim().toLowerCase() : val),
+          z.string()
+        ),
         duration: z.string().optional(),
         publishedDate: z.coerce.date().optional(),
       })

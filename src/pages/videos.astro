@@ -20,7 +20,7 @@ const videoSchemas = videos.map((video) => {
     description: video.description,
     contentUrl: video.url,
     embedUrl: video.url,
-    thumbnailUrl: video.thumbnail || new URL('/osfLogoFull.svg', siteURL).toString(),
+    thumbnailUrl: video.thumbnail || new URL('/logos/osfLogoFull.svg', siteURL).toString(),
     uploadDate: video.publishedDate ? new Date(video.publishedDate).toISOString() : undefined,
     duration: video.duration,
     publisher: {
@@ -29,7 +29,7 @@ const videoSchemas = videos.map((video) => {
       url: siteURL,
       logo: {
         '@type': 'ImageObject',
-        url: new URL('/osfLogoFull.svg', siteURL).toString(),
+        url: new URL('/logos/osfLogoFull.svg', siteURL).toString(),
       },
     },
   };
@@ -61,7 +61,7 @@ const collectionPageSchema = {
         name: video.title,
         description: video.description,
         contentUrl: video.url,
-        thumbnailUrl: video.thumbnail || new URL('/osfLogoFull.svg', siteURL).toString(),
+        thumbnailUrl: video.thumbnail || new URL('/logos/osfLogoFull.svg', siteURL).toString(),
       },
     })),
   },

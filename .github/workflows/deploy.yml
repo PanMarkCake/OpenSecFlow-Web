@@ -1,8 +1,9 @@
-name: Deploy Astro site to Cloudflare Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -10,19 +11,21 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    name: Deploy to Cloudflare Pages
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Astro site
+      - name: Build
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
@@ -31,4 +34,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=opensecflow
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

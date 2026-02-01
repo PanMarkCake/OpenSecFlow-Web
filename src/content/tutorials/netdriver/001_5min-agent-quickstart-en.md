@@ -198,7 +198,7 @@ You can see the following key information from the logs:
 
 Additionally, we provide OpenAPI documentation and debugging interface based on the FastAPI framework, which you can access at: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-<img src="./openapi.png" style="width:600px;height:400px;">
+<img src="/assets/openapi.png" style="width:600px;height:400px;">
 
 ---
 
@@ -655,5 +655,3 @@ Congratulations on completing the NetDriver quickstart! Here's what you can do n
 ---
 
 **Author**: Vincent Bergman
-
-
